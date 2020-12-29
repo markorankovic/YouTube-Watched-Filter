@@ -18,6 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleEnabled()
         })    
     })
+
+    chrome.storage.sync.get("data", function(result) {
+        const txt = document.getElementsByTagName("h2")[0]
+        console.log(result.data.length)
+        txt.textContent = "Total filtered: " + result.data.length
+    })
 })
 
 function toggleEnabled() {

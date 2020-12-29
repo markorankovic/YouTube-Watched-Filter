@@ -1,4 +1,26 @@
 chrome.tabs.onCreated.addListener(evaluateCreation)
+chrome.tabs.onUpdated.addListener(function() {
+    chrome.storage.sync.get("automaticEnabled", function(enabled) {
+        if (enabled.automaticEnabled) {
+            chrome.tabs.getSelected(null, function(tab) {
+                filterResults()
+                chrome.tabs.sendMessage(tab.id, "beginObservation")
+            })    
+        }
+    })
+})
+
+chrome.runtime.onMessage.addListener(function(msg) {
+    if (msg == "updateToPage") {
+        console.log("More videos loaded")
+        updateToPage()
+    }
+})
+
+function updateToPage() {
+    console.log("More videos loaded")
+    filterResults()
+}
 
 function clearList() {
     console.log("Clearing list")
@@ -7,15 +29,10 @@ function clearList() {
 
 function filterResults() {
     chrome.tabs.getSelected(null, function(tab) {
-        if (isYouTubeSearchPage(null, null, tab)) {
+        console.log("Filter")
+        if (isYouTubeSearchPage(tab.url)) {
             console.log("Filtering results...")
-            chrome.storage.sync.get("data", function(result) {
-                const links = result.data
-                chrome.storage.sync.set({ toFilter : links }, function() { 
-                    console.log("Links to filter set.")
-                    chrome.tabs.executeScript(null, {file: './foreground.js'}, () => console.log("Execute foreground"))
-                })
-            })        
+            chrome.tabs.sendMessage(tab.id, "beginFilter")
         }
     })
 }
@@ -30,15 +47,15 @@ function storeYouTubeLink(link) {
     })
 }
 
-function isYouTubeSearchPage(tabId, changeInfo, tab) {
-    if (tab.status != 'complete') { return false }
+function isYouTubeSearchPage(url) {
     let videoLinkFormat = "https://www.youtube.com/results?search_query="
-    return tab.url.includes(videoLinkFormat)
+    return url.includes(videoLinkFormat)
 }
 
 function isYouTubeVideo(activeInfo) {
     console.log(activeInfo.pendingUrl)
-    let videoLinkFormat = "https://www.youtube.com/watch?"
+    //const videoLinkFormat = "https://www.youtube.com/watch?"
+    const videoLinkFormat = "watch?"
     return activeInfo.pendingUrl.includes(videoLinkFormat)
 }
 

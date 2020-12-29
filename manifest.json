@@ -10,11 +10,19 @@
     "browser_action": {
         "default_popup": "./popup.html"
     },
+    "options_page": "./options.html",
     "icons": {
         "16": "./LogoDesign16.png",
         "32": "./LogoDesign32.png",
         "48": "./LogoDesign48.png",
         "128": "./LogoDesign128.png"
     },
+    "content_scripts": [
+        {
+            "matches": ["*://*.youtube.com/*"],
+            "js": ["foreground.js"],
+            "all_frames": true
+        }
+    ],   
     "manifest_version": 2
 }

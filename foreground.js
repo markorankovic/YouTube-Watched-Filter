@@ -1,9 +1,32 @@
-console.log("Entered foreground")
-
-chrome.storage.sync.get("toFilter", function(result) {
-    const links = result.toFilter
-    filter(links)
+chrome.runtime.onMessage.addListener(function(msg) {
+    if (msg == "beginObservation") {
+        beginObservation()
+    } else if (msg == "beginFilter") {
+        beginFilter()
+    }
 })
+
+function beginFilter() {
+    chrome.storage.sync.get("data", function(result) {
+        const links = result.data
+        filter(links)
+    })    
+}
+
+const observer = new MutationObserver(function(mutationList) {
+    if (mutationList[0].oldValue == "") {
+        chrome.runtime.sendMessage(null, "updateToPage")
+    }
+})
+
+function beginObservation() {
+    const root = document.getElementById("primary").getElementsByTagName("ytd-section-list-renderer")[0]
+    console.log(root)
+    if (root != null) {
+        console.log(root)
+        observer.observe(root, { attributes : true, attributeOldValue : true })            
+    }
+}
 
 function filter(links) {
     console.log("filter")
