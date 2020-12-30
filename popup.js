@@ -20,9 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })
 
     chrome.storage.sync.get("data", function(result) {
-        const txt = document.getElementsByTagName("h2")[0]
-        console.log(result.data.length)
+        const txt = document.getElementById("totalFiltered")
         txt.textContent = "Total filtered: " + result.data.length
+    })
+
+    chrome.storage.sync.get("removedElements", function(result) {
+        const txt = document.getElementById("filteredOnPage")
+        txt.textContent = "Filtered on page: " + (result.removedElements ? result.removedElements : 0)
     })
 })
 

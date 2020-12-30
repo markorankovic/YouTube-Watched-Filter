@@ -24,7 +24,8 @@ function updateToPage() {
 
 function clearList() {
     console.log("Clearing list")
-    chrome.storage.sync.set({ data : [] })    
+    chrome.storage.sync.set({ data : [] })
+    chrome.storage.sync.set({ "removedElements" : 0 })
 }
 
 function filterResults() {

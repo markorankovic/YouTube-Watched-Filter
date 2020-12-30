@@ -1,6 +1,16 @@
+var removedElements = 0
+chrome.storage.sync.set({ "removedElements" : removedElements })
+
+const observer = new MutationObserver(function(mutationList) {
+    console.log("Mutation detected")
+    if (mutationList[0].oldValue == "") {
+        chrome.runtime.sendMessage(null, "updateToPage")
+    }
+})
+
 chrome.runtime.onMessage.addListener(function(msg) {
     if (msg == "beginObservation") {
-        beginObservation()
+        beginObservation(observer)
     } else if (msg == "beginFilter") {
         beginFilter()
     }
@@ -8,18 +18,13 @@ chrome.runtime.onMessage.addListener(function(msg) {
 
 function beginFilter() {
     chrome.storage.sync.get("data", function(result) {
+        removedElements = 0
         const links = result.data
         filter(links)
     })    
 }
 
-const observer = new MutationObserver(function(mutationList) {
-    if (mutationList[0].oldValue == "") {
-        chrome.runtime.sendMessage(null, "updateToPage")
-    }
-})
-
-function beginObservation() {
+function beginObservation(observer) {
     const root = document.getElementById("primary").getElementsByTagName("ytd-section-list-renderer")[0]
     console.log(root)
     if (root != null) {
@@ -36,6 +41,7 @@ function filter(links) {
             evaluate(links[i])
         }
     }
+    chrome.storage.sync.set({ "removedElements" : removedElements })
 }
 
 function evaluate(link) {
@@ -52,6 +58,7 @@ function evaluate(link) {
                 console.log(videoElements[i])
                 console.log("remove ")
                 videoElements[i].remove()
+                removedElements++
             }
         }
     }
