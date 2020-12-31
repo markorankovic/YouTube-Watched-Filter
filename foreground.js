@@ -1,11 +1,6 @@
-var removedElements = 0
-chrome.storage.sync.set({ "removedElements" : removedElements })
-
 const observer = new MutationObserver(function(mutationList) {
-    console.log("Mutation detected")
-    if (mutationList[0].oldValue == "") {
-        chrome.runtime.sendMessage(null, "updateToPage")
-    }
+    //console.log(mutationList)
+    chrome.runtime.sendMessage(null, "updateToPage")
 })
 
 chrome.runtime.onMessage.addListener(function(msg) {
@@ -18,23 +13,26 @@ chrome.runtime.onMessage.addListener(function(msg) {
 
 function beginFilter() {
     chrome.storage.sync.get("data", function(result) {
-        removedElements = 0
         const links = result.data
         filter(links)
     })    
 }
 
 function beginObservation(observer) {
-    const root = document.getElementById("primary").getElementsByTagName("ytd-section-list-renderer")[0]
-    console.log(root)
-    if (root != null) {
-        console.log(root)
-        observer.observe(root, { attributes : true, attributeOldValue : true })            
+    const e = document.getElementById("contents")
+    //console.log("Element of interest")
+    //console.log(e)
+    //const root = document.getElementById("primary").getElementsByTagName("ytd-section-list-renderer")[0]
+    if (e != null) {
+        observer.observe(e, { childList : true, subtree : true })            
     }
 }
 
+var removedElements = 0
+
 function filter(links) {
-    console.log("filter")
+    //console.log("filter")
+    //removedElements = 0
     var i;
     for (i = 0; i < links.length; i++) {
         if (links[i] != null) {
@@ -45,7 +43,7 @@ function filter(links) {
 }
 
 function evaluate(link) {
-    console.log("evaluate")
+    //console.log("evaluate: " + link)
     const videoElements = document.getElementsByTagName("ytd-video-renderer")
     var i;
     for (i = 0; i < videoElements.length; i++) {
@@ -53,13 +51,12 @@ function evaluate(link) {
         var linkElement = videoElements[i].getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")[0]
         if (linkElement) {
             const href = linkElement.getAttribute('href')
-            console.log(href)
+            //console.log(href)
             if (link.includes(href)) {
-                console.log(videoElements[i])
-                console.log("remove ")
                 videoElements[i].remove()
                 removedElements++
-            }
+                //console.log(removedElements + " removed")
+            }    
         }
     }
 }

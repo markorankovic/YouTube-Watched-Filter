@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     chrome.storage.sync.get("removedElements", function(result) {
         const txt = document.getElementById("filteredOnPage")
-        txt.textContent = "Filtered on page: " + (result.removedElements ? result.removedElements : 0)
+        txt.textContent = "Filtered on page: " + result.removedElements
     })
 })
 
@@ -38,7 +38,7 @@ function toggleEnabled() {
 }
 
 function beginFilter() {
-    console.log("Filtering process to begin")
+    //console.log("Filtering process to begin")
     const backgroundPage = chrome.extension.getBackgroundPage()
     backgroundPage.filterResults()
 }
