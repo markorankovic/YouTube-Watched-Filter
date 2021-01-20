@@ -2,22 +2,23 @@ var sharedPort = {}
 
 chrome.runtime.onConnect.addListener(function(port) {
     console.log("Connected")
-    chrome.tabs.getSelected(null, function(tab) {
-        const tabId = tab.id
-        sharedPort[tabId] = port
-        port.onDisconnect.addListener(function() {
-            console.log(port)
-            console.log("Disconnected port: " + port.id)
-        })        
-    })
+    const tabId = latestTab.id
+    sharedPort[tabId] = port
+    port.onDisconnect.addListener(function() {
+        console.log(port)
+        console.log("Disconnected port")
+    })        
 })
 
+var latestTab
+
 chrome.tabs.onCreated.addListener(function(tab) {
+    latestTab = tab
     evaluateCreation(tab)
 })
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    console.log(tab)
+    latestTab = tab
     if (changeInfo.status == "complete" && sharedPort[tabId] && isYouTubeSearchPage(tab.url)) {
         sharedPort[tabId].postMessage({func: "beginObservation", tabId: tabId})
         filterResults(false)
@@ -32,7 +33,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 function filterResults(manual) {
     chrome.tabs.getSelected(null, function(tab) {
-        console.log(sharedPort)
         sharedPort[tab.id].postMessage({func: "beginFilter", tabId: tab.id, manual: manual})
     })
 }

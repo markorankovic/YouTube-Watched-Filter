@@ -38,7 +38,6 @@ function beginObservation(tabId) {
 }
 
 var removedElements = 0
-chrome.storage.sync.set({ "removedElements": removedElements })
 
 function filter(links, tabId) {
     var i;

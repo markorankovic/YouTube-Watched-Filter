@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var filterButton = document.getElementById("filterButton")
     filterButton.addEventListener('click', function() {
+        console.log("Filter button pressed")
         beginFilter()
     })
     var clearButton = document.getElementById("clearButton")
