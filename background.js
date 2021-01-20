@@ -22,7 +22,11 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         sharedPort[tabId].postMessage({func: "beginObservation", tabId: tabId})
         filterResults(false)
     } else if (isYouTubeVideo(tab.url)) {
-        storeYouTubeLink(tab.url)
+        chrome.storage.sync.get("enabled", function(enabled) {
+            if (enabled.enabled) {
+                storeYouTubeLink(tab.url)
+            }
+        })
     }
 })
 
