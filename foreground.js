@@ -48,7 +48,6 @@ function filter(links, tabId) {
         }
     }
     setRemovedElements(tabId)
-    console.log(links)
 }
 
 function setRemovedElements(tabId) {
@@ -57,7 +56,8 @@ function setRemovedElements(tabId) {
         if (result.removedElements) {
             result.removedElements[tabId] = removedElements
         } else {
-            result.removedElements = {tabId: removedElements}
+            result.removedElements = []
+            result.removedElements[tabId] = removedElements
         }
         chrome.storage.sync.set({ "removedElements": result.removedElements })
     })
@@ -70,7 +70,7 @@ function evaluate(link) {
         const e = videoElements[i].getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")
         var linkElement = videoElements[i].getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")[0]
         if (linkElement) {
-            const href = linkElement.getAttribute('href')
+            const href = linkElement.getAttribute('href').split("&")[0]
             if (link.includes(href)) {
                 videoElements[i].remove()
                 removedElements++

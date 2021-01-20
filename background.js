@@ -17,11 +17,13 @@ chrome.tabs.onCreated.addListener(function(tab) {
 })
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    console.log(tab)
     if (changeInfo.status == "complete" && sharedPort[tabId] && isYouTubeSearchPage(tab.url)) {
         sharedPort[tabId].postMessage({func: "beginObservation", tabId: tabId})
         filterResults(false)
+    } else if (isYouTubeVideo(tab.url)) {
+        storeYouTubeLink(tab.url)
     }
-    
 })
 
 function filterResults(manual) {
@@ -34,13 +36,18 @@ function filterResults(manual) {
 function clearList() {
     chrome.storage.sync.set({ data : [] })
     chrome.storage.sync.set({ "removedElements" : 0 })
+    chrome.storage.sync.set({ "automaticEnabled" : false })
 }
 
 function storeYouTubeLink(link) {
     var links = []
     chrome.storage.sync.get("data", function(result) { 
         if (result.data != null) { links = result.data }
-        links.push(link)
+        console.log(links)
+        if (!links.includes(link.split("&")[0])) {
+            links.push(link.split("&")[0])
+        }
+        console.log(links)
         chrome.tabs.getSelected(null, function(currentTab) {
             chrome.storage.sync.set({ data : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
         })
@@ -52,14 +59,14 @@ function isYouTubeSearchPage(url) {
     return url.includes(videoLinkFormat)
 }
 
-function isYouTubeVideo(tab) {
+function isYouTubeVideo(url) {
     const videoLinkFormat = "watch?"
-    return tab.pendingUrl.includes(videoLinkFormat)
+    return url.includes(videoLinkFormat)
 }
 
 function evaluateCreation(tab) {
     chrome.storage.sync.get("enabled", function(enabled) {
-        if (isYouTubeVideo(tab) && enabled.enabled) {
+        if (isYouTubeVideo(tab.pendingUrl) && enabled.enabled) {
             storeYouTubeLink(tab.pendingUrl)
         }
     })
