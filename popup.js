@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     chrome.storage.sync.get("data", function(result) {
         const txt = document.getElementById("totalFiltered")
-        txt.textContent = "Total filtered: " + (result.data.length ? result.data.length : 0)
+        txt.textContent = "Videos added: " + (result.data.length ? result.data.length : 0)
     })
 
     chrome.tabs.getSelected(null, function(tab) {
