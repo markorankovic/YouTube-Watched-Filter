@@ -5,8 +5,8 @@ chrome.runtime.onConnect.addListener(function(port) {
     const tabId = latestTab.id
     sharedPort[tabId] = port
     port.onDisconnect.addListener(function() {
-        console.log(port)
-        console.log("Disconnected port")
+        // console.log(port)
+        // console.log("Disconnected port")
     })        
 })
 
@@ -47,11 +47,11 @@ function storeYouTubeLink(link) {
     var links = []
     chrome.storage.sync.get("data", function(result) { 
         if (result.data != null) { links = result.data }
-        console.log(links)
+        // console.log(links)
         if (!links.includes(link.split("&")[0])) {
             links.push(link.split("&")[0])
         }
-        console.log(links)
+        // console.log(links)
         chrome.tabs.getSelected(null, function(currentTab) {
             chrome.storage.sync.set({ data : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
         })

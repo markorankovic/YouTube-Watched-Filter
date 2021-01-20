@@ -4,13 +4,13 @@ sharedPort.onMessage.addListener(function(msg, sender, sendResponse) {
     if (msg.func == "beginObservation") {
         beginObservation(msg.tabId)
     } else if (msg.func == "beginFilter") {
-        console.log("beginFilter")
+        // console.log("beginFilter")
         beginFilter(msg.tabId, msg.manual)
     }
 })
 
 sharedPort.onDisconnect.addListener(function() {
-    console.log("Disconnected")
+    // console.log("Disconnected")
 })
 
 console.log("Foreground executing")
@@ -27,7 +27,7 @@ function beginFilter(tabId, manual) {
 }
 
 function beginObservation(tabId) {
-    console.log("beginObservation")
+    // console.log("beginObservation")
     const observer = new MutationObserver(function(mutationList) {
         beginFilter(tabId, false)
     })
@@ -50,7 +50,7 @@ function filter(links, tabId) {
 }
 
 function setRemovedElements(tabId) {
-    console.log(removedElements)
+    // console.log(removedElements)
     chrome.storage.sync.get("removedElements", function(result) {
         if (result.removedElements) {
             result.removedElements[tabId] = removedElements
