@@ -2,7 +2,7 @@
     "name": "YouTube Watched Filter",
     "version": "1.0.1",
     "description": "Filter videos you have already seen on the YouTube search results page!",
-    "permissions": ["storage", "tabs", "https://www.youtube.com/*", "activeTab"],
+    "permissions": ["storage", "tabs", "https://www.youtube.com/*"],
     "background": {
         "scripts": ["background.js"],
         "persistent": false
