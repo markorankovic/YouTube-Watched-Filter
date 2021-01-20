@@ -21,12 +21,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     chrome.storage.sync.get("data", function(result) {
         const txt = document.getElementById("totalFiltered")
-        txt.textContent = "Total filtered: " + result.data.length
+        txt.textContent = "Total filtered: " + (result.data.length ? result.data.length : 0)
     })
 
-    chrome.storage.sync.get("removedElements", function(result) {
-        const txt = document.getElementById("filteredOnPage")
-        txt.textContent = "Filtered on page: " + result.removedElements
+    chrome.tabs.getSelected(null, function(tab) {
+        chrome.storage.sync.get("removedElements", function(result) {
+            const txt = document.getElementById("filteredOnPage")
+            console.log(tab.id)
+            console.log(result.removedElements)
+            txt.textContent = "Filtered on page: " + (result.removedElements[tab.id] ? result.removedElements[tab.id] : 0)
+        })
     })
 })
 
@@ -38,7 +42,10 @@ function toggleEnabled() {
 }
 
 function beginFilter() {
-    //console.log("Filtering process to begin")
-    const backgroundPage = chrome.extension.getBackgroundPage()
-    backgroundPage.filterResults()
+    chrome.storage.sync.get("enabled", function(enabled) {
+        if (enabled.enabled) {
+            const backgroundPage = chrome.extension.getBackgroundPage()
+            backgroundPage.filterResults(true)    
+        }
+    })
 }

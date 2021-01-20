@@ -1,39 +1,39 @@
-chrome.tabs.onCreated.addListener(evaluateCreation)
-chrome.tabs.onUpdated.addListener(function() {
-    chrome.storage.sync.get("automaticEnabled", function(enabled) {
-        if (enabled.automaticEnabled) {
-            chrome.tabs.getSelected(null, function(tab) {
-                filterResults()
-                chrome.tabs.sendMessage(tab.id, "beginObservation")
-            })    
-        }
+var sharedPort = {}
+
+chrome.runtime.onConnect.addListener(function(port) {
+    console.log("Connected")
+    chrome.tabs.getSelected(null, function(tab) {
+        const tabId = tab.id
+        sharedPort[tabId] = port
+        port.onDisconnect.addListener(function() {
+            console.log(port)
+            console.log("Disconnected port: " + port.id)
+        })        
     })
 })
 
-chrome.runtime.onMessage.addListener(function(msg) {
-    if (msg == "updateToPage") {
-        updateToPage()
-    }
+chrome.tabs.onCreated.addListener(function(tab) {
+    evaluateCreation(tab)
 })
 
-function updateToPage() {
-    //console.log("More videos loaded")
-    filterResults()
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    if (changeInfo.status == "complete" && sharedPort[tabId] && isYouTubeSearchPage(tab.url)) {
+        sharedPort[tabId].postMessage({func: "beginObservation", tabId: tabId})
+        filterResults(false)
+    }
+    
+})
+
+function filterResults(manual) {
+    chrome.tabs.getSelected(null, function(tab) {
+        console.log(sharedPort)
+        sharedPort[tab.id].postMessage({func: "beginFilter", tabId: tab.id, manual: manual})
+    })
 }
 
 function clearList() {
-    //console.log("Clearing list")
     chrome.storage.sync.set({ data : [] })
     chrome.storage.sync.set({ "removedElements" : 0 })
-}
-
-function filterResults() {
-    chrome.tabs.getSelected(null, function(tab) {
-        if (isYouTubeSearchPage(tab.url)) {
-            //console.log("Filtering results...")
-            chrome.tabs.sendMessage(tab.id, "beginFilter")
-        }
-    })
 }
 
 function storeYouTubeLink(link) {
@@ -41,8 +41,9 @@ function storeYouTubeLink(link) {
     chrome.storage.sync.get("data", function(result) { 
         if (result.data != null) { links = result.data }
         links.push(link)
-        //onsole.log(links)
-        chrome.storage.sync.set({ data : links }, function() { console.log("Link saved.") })    
+        chrome.tabs.getSelected(null, function(currentTab) {
+            chrome.storage.sync.set({ data : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
+        })
     })
 }
 
@@ -51,19 +52,15 @@ function isYouTubeSearchPage(url) {
     return url.includes(videoLinkFormat)
 }
 
-function isYouTubeVideo(activeInfo) {
-    //console.log(activeInfo.pendingUrl)
-    //const videoLinkFormat = "https://www.youtube.com/watch?"
+function isYouTubeVideo(tab) {
     const videoLinkFormat = "watch?"
-    return activeInfo.pendingUrl.includes(videoLinkFormat)
+    return tab.pendingUrl.includes(videoLinkFormat)
 }
 
-function evaluateCreation(activeInfo) {
-    //console.log("Tab created.")
+function evaluateCreation(tab) {
     chrome.storage.sync.get("enabled", function(enabled) {
-        if (isYouTubeVideo(activeInfo) && enabled.enabled) {
-            //console.log("Video will be marked as watched")
-            storeYouTubeLink(activeInfo.pendingUrl)
+        if (isYouTubeVideo(tab) && enabled.enabled) {
+            storeYouTubeLink(tab.pendingUrl)
         }
     })
 }

@@ -1,49 +1,69 @@
-const observer = new MutationObserver(function(mutationList) {
-    //console.log(mutationList)
-    chrome.runtime.sendMessage(null, "updateToPage")
-})
+var sharedPort = chrome.runtime.connect()
 
-chrome.runtime.onMessage.addListener(function(msg) {
-    if (msg == "beginObservation") {
-        beginObservation(observer)
-    } else if (msg == "beginFilter") {
-        beginFilter()
+sharedPort.onMessage.addListener(function(msg, sender, sendResponse) {
+    if (msg.func == "beginObservation") {
+        beginObservation(msg.tabId)
+    } else if (msg.func == "beginFilter") {
+        console.log("beginFilter")
+        beginFilter(msg.tabId, msg.manual)
     }
 })
 
-function beginFilter() {
-    chrome.storage.sync.get("data", function(result) {
-        const links = result.data
-        filter(links)
-    })    
+sharedPort.onDisconnect.addListener(function() {
+    console.log("Disconnected")
+})
+
+console.log("Foreground executing")
+
+function beginFilter(tabId, manual) {
+    chrome.storage.sync.get("automaticEnabled", function(autoenabled) {
+        if (autoenabled.automaticEnabled || manual) {
+            chrome.storage.sync.get("data", function(result) {
+                const links = result.data
+                filter(links, tabId)
+            })            
+        }
+    })
 }
 
-function beginObservation(observer) {
+function beginObservation(tabId) {
+    console.log("beginObservation")
+    const observer = new MutationObserver(function(mutationList) {
+        beginFilter(tabId, false)
+    })
     const e = document.getElementById("contents")
-    //console.log("Element of interest")
-    //console.log(e)
-    //const root = document.getElementById("primary").getElementsByTagName("ytd-section-list-renderer")[0]
     if (e != null) {
         observer.observe(e, { childList : true, subtree : true })            
     }
 }
 
 var removedElements = 0
+chrome.storage.sync.set({ "removedElements": removedElements })
 
-function filter(links) {
-    //console.log("filter")
-    //removedElements = 0
+function filter(links, tabId) {
     var i;
-    for (i = 0; i < links.length; i++) {
+    for (i = 0; i < (links ? links.length : 0); i++) {
         if (links[i] != null) {
             evaluate(links[i])
         }
     }
-    chrome.storage.sync.set({ "removedElements" : removedElements })
+    setRemovedElements(tabId)
+    console.log(links)
+}
+
+function setRemovedElements(tabId) {
+    console.log(removedElements)
+    chrome.storage.sync.get("removedElements", function(result) {
+        if (result.removedElements) {
+            result.removedElements[tabId] = removedElements
+        } else {
+            result.removedElements = {tabId: removedElements}
+        }
+        chrome.storage.sync.set({ "removedElements": result.removedElements })
+    })
 }
 
 function evaluate(link) {
-    //console.log("evaluate: " + link)
     const videoElements = document.getElementsByTagName("ytd-video-renderer")
     var i;
     for (i = 0; i < videoElements.length; i++) {
@@ -51,11 +71,9 @@ function evaluate(link) {
         var linkElement = videoElements[i].getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")[0]
         if (linkElement) {
             const href = linkElement.getAttribute('href')
-            //console.log(href)
             if (link.includes(href)) {
                 videoElements[i].remove()
                 removedElements++
-                //console.log(removedElements + " removed")
             }    
         }
     }
