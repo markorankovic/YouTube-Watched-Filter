@@ -50,9 +50,10 @@ function filter(links, tabId) {
 }
 
 function setRemovedElements(tabId) {
-    // console.log(removedElements)
+    //console.log(removedElements)
     chrome.storage.sync.get("removedElements", function(result) {
         if (result.removedElements) {
+            //console.log(removedElements)
             result.removedElements[tabId] = removedElements
         } else {
             result.removedElements = []
@@ -71,6 +72,7 @@ function evaluate(link) {
         if (linkElement) {
             const href = linkElement.getAttribute('href').split("&")[0]
             if (link.includes(href)) {
+                console.log(href)
                 videoElements[i].remove()
                 removedElements++
             }    

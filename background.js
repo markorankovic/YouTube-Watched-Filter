@@ -7,10 +7,18 @@ chrome.runtime.onConnect.addListener(function(port) {
     port.onDisconnect.addListener(function() {
         // console.log(port)
         // console.log("Disconnected port")
-    })        
+    })
 })
 
 var latestTab
+
+function resetRemovedElementsForCurrentPage(tabId) {
+    chrome.storage.sync.get("removedElements", function(result) {
+        result.removedElements[tabId] = 0
+        chrome.storage.sync.set({ "removedElements": result.removedElements })
+        console.log(result.removedElements[tabId])
+    })
+}
 
 chrome.tabs.onCreated.addListener(function(tab) {
     latestTab = tab
@@ -19,6 +27,9 @@ chrome.tabs.onCreated.addListener(function(tab) {
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     latestTab = tab
+    if (changeInfo.status == "complete") {
+        resetRemovedElementsForCurrentPage(tabId)
+    }
     if (changeInfo.status == "complete" && sharedPort[tabId] && isYouTubeSearchPage(tab.url)) {
         sharedPort[tabId].postMessage({func: "beginObservation", tabId: tabId})
         filterResults(false)
@@ -38,7 +49,7 @@ function filterResults(manual) {
 }
 
 function clearList() {
-    chrome.storage.sync.set({ data : [] })
+    chrome.storage.sync.set({ "data" : [] })
     chrome.storage.sync.set({ "removedElements" : 0 })
     chrome.storage.sync.set({ "automaticEnabled" : false })
 }
@@ -53,7 +64,7 @@ function storeYouTubeLink(link) {
         }
         // console.log(links)
         chrome.tabs.getSelected(null, function(currentTab) {
-            chrome.storage.sync.set({ data : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
+            chrome.storage.sync.set({ "data" : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
         })
     })
 }

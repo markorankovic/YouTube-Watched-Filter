@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "pwa-chrome",
+            "name": "https://www.youtube.com/results?search_query=infographics",
+            "request": "launch",
+            "url": "https://www.youtube.com/results?search_query=infographics"
+        }
+    ]
+}

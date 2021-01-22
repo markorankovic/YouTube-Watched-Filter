@@ -12,7 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleEnabled() {
     var enableBox = document.getElementById("automaticCheckbox")
     chrome.storage.sync.get("automaticEnabled", function(enabled) {
-        console.log(!enabled.automaticEnabled)
-        chrome.storage.sync.set({ "automaticEnabled" : (enabled.automaticEnabled != null ? !enabled.automaticEnabled : false) })
+        chrome.storage.sync.set({ "automaticEnabled" : (enabled.automaticEnabled != null ? !enabled.automaticEnabled : true) })
+        chrome.storage.sync.get("automaticEnabled", function(enabled) {
+            console.log(enabled.automaticEnabled)
+        })
     })   
 }
