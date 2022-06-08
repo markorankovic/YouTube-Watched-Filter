@@ -44,19 +44,54 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 function filterResults(manual) {
     chrome.tabs.getSelected(null, function(tab) {
+        console.log("sharedPort: ", sharedPort)
+        console.log("tab.id: ", tab.id)
+        console.log("sharedPort[tab.id]: ", sharedPort[tab.id])
         sharedPort[tab.id].postMessage({func: "beginFilter", tabId: tab.id, manual: manual})
     })
 }
 
+function getNDataKeys() {
+    return chrome.storage.sync.MAX_ITEMS - 2
+}
+
+function getDataKeys() {
+    const nKeys = getNDataKeys()
+    var keys = []
+    for (var i = 0; i < nKeys; i++) {
+        keys.push("data" + (i + 1))
+    }
+    return keys
+}
+
+async function getAvailableDataKey() {
+    const keys = getDataKeys()
+    const nKeys = getNDataKeys()
+    var i = 0
+    for (i = 0; i < nKeys.length; i++) {
+        await chrome.storage.sync.getBytesInUse(keys[i + 1], function(currentStorage) {
+            const maxStorage = chrome.storage.sync.QUOTA_BYTES_PER_ITEM
+            const bytesPerVideo = maxStorage / 178
+            const nSpaceForVideos = (maxStorage - currentStorage) / bytesPerVideo
+            if (nSpaceForVideos >= 1) {
+                return Promise.resolve("data" + (i + 1))
+            }
+        })
+    }
+    return Promise.resolve("data1")
+}
+
 function clearList() {
-    chrome.storage.sync.set({ "data" : [] })
+    chrome.storage.sync.clear()
     chrome.storage.sync.set({ "removedElements" : 0 })
     chrome.storage.sync.set({ "automaticEnabled" : false })
 }
 
-function storeYouTubeLink(link) {
+async function storeYouTubeLink(link) {
     var links = []
-    chrome.storage.sync.get("data", function(result) { 
+    const key = await getAvailableDataKey()
+    console.log("key: ", key)
+    chrome.storage.sync.get(key, function(result) { 
         if (result.data != null) { links = result.data }
         // console.log(links)
         if (!links.includes(link.split("&")[0])) {
@@ -64,7 +99,7 @@ function storeYouTubeLink(link) {
         }
         // console.log(links)
         chrome.tabs.getSelected(null, function(currentTab) {
-            chrome.storage.sync.set({ "data" : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
+            chrome.storage.sync.set({ key : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
         })
     })
 }

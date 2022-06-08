@@ -1,10 +1,11 @@
 var sharedPort = chrome.runtime.connect()
 
 sharedPort.onMessage.addListener(function(msg, sender, sendResponse) {
+    console.log("Message received")
     if (msg.func == "beginObservation") {
         beginObservation(msg.tabId)
     } else if (msg.func == "beginFilter") {
-        // console.log("beginFilter")
+        console.log("beginFilter")
         beginFilter(msg.tabId, msg.manual)
     }
 })
@@ -15,11 +16,26 @@ sharedPort.onDisconnect.addListener(function() {
 
 console.log("Foreground executing")
 
+function getNDataKeys() {
+    return chrome.storage.sync.MAX_ITEMS - 2
+}
+
+function getDataKeys() {
+    const nKeys = getNDataKeys()
+    var keys = []
+    for (var i = 0; i < nKeys; i++) {
+        keys.push("data" + (i + 1))
+    }
+    return keys
+}
+
 function beginFilter(tabId, manual) {
     chrome.storage.sync.get("automaticEnabled", function(autoenabled) {
         if (autoenabled.automaticEnabled || manual) {
-            chrome.storage.sync.get("data", function(result) {
+            chrome.storage.sync.get("data1", function(result) {
+                console.log("result: ", result)
                 const links = result.data
+                console.log("links: ", links)
                 filter(links, tabId)
             })            
         }

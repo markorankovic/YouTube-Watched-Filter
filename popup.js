@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })    
     })
 
-    chrome.storage.sync.get("data", function(result) {
+    chrome.storage.sync.get(backgroundPage.getDataKeys(), function(result) {
         const txt = document.getElementById("totalFiltered")
         txt.textContent = "Videos added: " + (result.data.length ? result.data.length : 0)
     })
