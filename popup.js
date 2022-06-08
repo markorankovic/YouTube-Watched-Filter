@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var filterButton = document.getElementById("filterButton")
     filterButton.addEventListener('click', function() {
-        // console.log("Filter button pressed")
         beginFilter()
     })
     var clearButton = document.getElementById("clearButton")
@@ -28,8 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.tabs.getSelected(null, function(tab) {
         chrome.storage.sync.get("removedElements", function(result) {
             const txt = document.getElementById("filteredOnPage")
-            // console.log(tab.id)
-            // console.log(result.removedElements)
             txt.textContent = "Filtered on page: " + (result.removedElements[tab.id] ? result.removedElements[tab.id] : 0)
         })
     })
