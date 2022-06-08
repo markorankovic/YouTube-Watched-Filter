@@ -44,22 +44,39 @@ function filterResults(manual) {
     })
 }
 
-function clearList() {
+function clearLinks() {
     chrome.storage.sync.set({ "data" : [] })
+}
+
+async function getLinks() {
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get("data", (result) => {
+            const links = result?.data ?? []
+            console.log("links: ", links)
+            resolve(links)
+        })    
+    })
+}
+
+function clearList() {
+    clearLinks()
     chrome.storage.sync.set({ "removedElements" : 0 })
     chrome.storage.sync.set({ "automaticEnabled" : false })
 }
 
-function storeYouTubeLink(link) {
+async function storeYouTubeLink(link) {
     var links = []
-    chrome.storage.sync.get("data", function(result) { 
-        if (result.data != null) { links = result.data }
-        if (!links.includes(link.split("&")[0])) {
-            links.push(link.split("&")[0])
-        }
-        chrome.tabs.getSelected(null, function(currentTab) {
-            chrome.storage.sync.set({ "data" : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
-        })
+    
+    const result = await getLinks()
+
+    console.log("result: ", result)
+
+    links = result
+    if (!links.includes(link.split("&")[0])) {
+        links.push(link.split("&")[0])
+    }
+    chrome.tabs.getSelected(null, function(currentTab) {
+        chrome.storage.sync.set({ "data" : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
     })
 }
 
