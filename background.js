@@ -38,9 +38,10 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     }
 })
 
-function filterResults(manual) {
+async function filterResults(manual) {
+    const links = await getLinks()
     chrome.tabs.getSelected(null, function(tab) {
-        sharedPort[tab.id].postMessage({func: "beginFilter", tabId: tab.id, manual: manual})
+        sharedPort[tab.id].postMessage({func: "beginFilter", tabId: tab.id, manual: manual, links: links})
     })
 }
 

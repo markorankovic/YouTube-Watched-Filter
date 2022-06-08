@@ -4,19 +4,17 @@ sharedPort.onMessage.addListener(function(msg, sender, sendResponse) {
     if (msg.func == "beginObservation") {
         beginObservation(msg.tabId)
     } else if (msg.func == "beginFilter") {
-        beginFilter(msg.tabId, msg.manual)
+        beginFilter(msg.tabId, msg.manual, msg.links)
     }
 })
 
 console.log("Foreground executing")
 
-function beginFilter(tabId, manual) {
+function beginFilter(tabId, manual, links) {
+    console.log("Links: ", links)
     chrome.storage.sync.get("automaticEnabled", function(autoenabled) {
         if (autoenabled.automaticEnabled || manual) {
-            chrome.storage.sync.get("data", function(result) {
-                const links = result.data
-                filter(links, tabId)
-            })            
+            filter(links, tabId)
         }
     })
 }
