@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     var clearButton = document.getElementById("clearButton")
     clearButton.addEventListener('click', function() {
+        console.log("Clear button pressed")
         backgroundPage.clearList()
     })
 
@@ -19,15 +20,16 @@ document.addEventListener('DOMContentLoaded', function() {
         })    
     })
 
-    chrome.storage.sync.get("data", function(result) {
+    backgroundPage.getLinks().then(links => {
+        console.log("Links: ", links)
         const txt = document.getElementById("totalFiltered")
-        txt.textContent = "Videos added: " + (result.data.length ? result.data.length : 0)
+        txt.textContent = "Videos added: " + (links.length ? links.length : 0)
     })
 
     chrome.tabs.getSelected(null, function(tab) {
         chrome.storage.sync.get("removedElements", function(result) {
             const txt = document.getElementById("filteredOnPage")
-            txt.textContent = "Filtered on page: " + (result.removedElements[tab.id] ? result.removedElements[tab.id] : 0)
+            txt.textContent = "Filtered on page: " + (result?.removedElements[tab.id] ?? 0)
         })
     })
 })

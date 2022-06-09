@@ -11,9 +11,10 @@ sharedPort.onMessage.addListener(function(msg, sender, sendResponse) {
 console.log("Foreground executing")
 
 function beginFilter(tabId, manual, links) {
-    console.log("Links: ", links)
+    console.log("beginFilter")
     chrome.storage.sync.get("automaticEnabled", function(autoenabled) {
         if (autoenabled.automaticEnabled || manual) {
+            console.log("beginFilter links", links)
             filter(links, tabId)
         }
     })
@@ -32,6 +33,7 @@ function beginObservation(tabId) {
 var removedElements = 0
 
 function filter(links, tabId) {
+    console.log("filter links: ", links)
     var i;
     for (i = 0; i < (links ? links.length : 0); i++) {
         if (links[i] != null) {
@@ -54,6 +56,7 @@ function setRemovedElements(tabId) {
 }
 
 function evaluate(link) {
+    console.log("evaluate link: ", link)
     const videoElements = document.getElementsByTagName("ytd-video-renderer")
     var i;
     for (i = 0; i < videoElements.length; i++) {
