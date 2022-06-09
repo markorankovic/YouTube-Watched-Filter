@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     var clearButton = document.getElementById("clearButton")
     clearButton.addEventListener('click', function() {
-        console.log("Clear button pressed")
+        //console.log("Clear button pressed")
         backgroundPage.clearList()
     })
 
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
 
     backgroundPage.getLinks().then(links => {
-        console.log("Links: ", links)
+        //console.log("Links: ", links)
         const txt = document.getElementById("totalFiltered")
         txt.textContent = "Videos added: " + (links.length ? links.length : 0)
     })
