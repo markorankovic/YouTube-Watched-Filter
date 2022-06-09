@@ -146,7 +146,7 @@ async function clearList() {
     chrome.storage.sync.set({ "automaticEnabled" : false })
 }
 
-async function storeYouTubeLink(link) { // TODO: The last 176 links + the new link
+async function storeYouTubeLink(link) {
     var links = []
     
     const slot = await getAvailableLinkSlot()
