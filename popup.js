@@ -20,6 +20,16 @@ document.addEventListener('DOMContentLoaded', function() {
         })    
     })
 
+    var reversedBox = document.getElementById("reversedCheckbox")
+
+    chrome.storage.sync.get("reversed", function(reversed) {
+        reversedBox.checked = (reversed.reversed != null ? reversed.reversed : false)
+        reversedBox.addEventListener('click', function() {
+            toggleReversed()
+        })    
+    })
+
+
     backgroundPage.getLinks().then(links => {
         //console.log("Links: ", links)
         const txt = document.getElementById("totalFiltered")
@@ -38,6 +48,13 @@ function toggleEnabled() {
     chrome.storage.sync.get("enabled", function(enabled) {
         var enableBox = document.getElementById("enableCheckbox")
         chrome.storage.sync.set({ "enabled" : (enabled.enabled != null ? !enabled.enabled : enableBox.checked) })
+    })
+}
+
+function toggleReversed() {
+    chrome.storage.sync.get("reversed", function(reversed) {
+        var reversedBox = document.getElementById("reversedCheckbox")
+        chrome.storage.sync.set({ "reversed" : (reversed.reversed != null ? !reversed.reversed : reversedBox.checked) })
     })
 }
 

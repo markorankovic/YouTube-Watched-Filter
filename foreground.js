@@ -34,13 +34,27 @@ var removedElements = 0
 
 function filter(links, tabId) {
     //console.log("filter links: ", links)
-    var i;
-    for (i = 0; i < (links ? links.length : 0); i++) {
-        if (links[i] != null) {
-            evaluate(links[i])
+    chrome.storage.sync.get("reversed", function(result) {
+        var i;
+        if (result.reversed) {
+            evaluateReversed(links)
+        } else {
+            for (i = 0; i < (links ? links.length : 0); i++) {
+                if (links[i] != null) {
+                    //console.log("evaluate")
+                    evaluate(links[i])
+                }
+            }    
         }
-    }
-    setRemovedElements(tabId)
+
+        for (var i = 0; i < elementsToRemove.length; i++) {
+            const e = elementsToRemove[i]
+            e.remove()
+            removedElements++
+        }
+        setRemovedElements(tabId)
+        elementsToRemove = []
+    })
 }
 
 function setRemovedElements(tabId) {
@@ -55,20 +69,45 @@ function setRemovedElements(tabId) {
     })
 }
 
+var elementsToRemove = []
+
+function evaluateReversed(links) {
+    const videoElements = document.getElementsByTagName("ytd-video-renderer")
+    for (var i = 0; i < videoElements.length; i++) {
+        const videoElement = videoElements[i]
+        const linkElement = videoElement.getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")[0].getAttribute('href').split("&")[0]
+        var exists = false
+        for (var j = 0; j < links.length; j++) {
+            const link = links[j]
+            if (link.includes(linkElement)) {
+                exists = true
+            }
+        }
+        if (!exists) {
+            elementsToRemove.push(videoElement)
+        }
+    }
+}
+
 function evaluate(link) {
+    //console.log("reversed: ", reversed)
     //console.log("evaluate link: ", link)
     const videoElements = document.getElementsByTagName("ytd-video-renderer")
+    console.log("videoElements length: ", videoElements.length)
     var i;
     for (i = 0; i < videoElements.length; i++) {
         const e = videoElements[i].getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")
         var linkElement = videoElements[i].getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")[0]
         if (linkElement) {
             const href = linkElement.getAttribute('href').split("&")[0]
-            if (link.includes(href)) {
+            //console.log("link: ", link)
+            //console.log("href: ", href)
+            const exists = link.includes(href)
+            //console.log("exists: ", exists)
+            if (exists) {
                 //console.log(href)
-                videoElements[i].remove()
-                removedElements++
-            }    
+                elementsToRemove.push(videoElements[i])
+            }
         }
     }
 }

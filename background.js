@@ -47,6 +47,7 @@ async function clearList() {
     await chrome.storage.sync.clear()
     chrome.storage.sync.set({ "removedElements" : 0 })
     chrome.storage.sync.set({ "automaticEnabled" : false })
+    chrome.storage.sync.set({ "reversed" : false })
 }
 
 async function storeYouTubeLink(link) {
