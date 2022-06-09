@@ -3,11 +3,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var filterButton = document.getElementById("filterButton")
     filterButton.addEventListener('click', function() {
-        // console.log("Filter button pressed")
         beginFilter()
     })
     var clearButton = document.getElementById("clearButton")
     clearButton.addEventListener('click', function() {
+        //console.log("Clear button pressed")
         backgroundPage.clearList()
     })
 
@@ -20,17 +20,26 @@ document.addEventListener('DOMContentLoaded', function() {
         })    
     })
 
-    chrome.storage.sync.get("data", function(result) {
+    var reversedBox = document.getElementById("reversedCheckbox")
+
+    chrome.storage.sync.get("reversed", function(reversed) {
+        reversedBox.checked = (reversed.reversed != null ? reversed.reversed : false)
+        reversedBox.addEventListener('click', function() {
+            toggleReversed()
+        })    
+    })
+
+
+    backgroundPage.getLinks().then(links => {
+        //console.log("Links: ", links)
         const txt = document.getElementById("totalFiltered")
-        txt.textContent = "Videos added: " + (result.data.length ? result.data.length : 0)
+        txt.textContent = "Videos added: " + (links.length ? links.length : 0)
     })
 
     chrome.tabs.getSelected(null, function(tab) {
         chrome.storage.sync.get("removedElements", function(result) {
             const txt = document.getElementById("filteredOnPage")
-            // console.log(tab.id)
-            // console.log(result.removedElements)
-            txt.textContent = "Filtered on page: " + (result.removedElements[tab.id] ? result.removedElements[tab.id] : 0)
+            txt.textContent = "Filtered on page: " + (result?.removedElements[tab.id] ?? 0)
         })
     })
 })
@@ -39,6 +48,13 @@ function toggleEnabled() {
     chrome.storage.sync.get("enabled", function(enabled) {
         var enableBox = document.getElementById("enableCheckbox")
         chrome.storage.sync.set({ "enabled" : (enabled.enabled != null ? !enabled.enabled : enableBox.checked) })
+    })
+}
+
+function toggleReversed() {
+    chrome.storage.sync.get("reversed", function(reversed) {
+        var reversedBox = document.getElementById("reversedCheckbox")
+        chrome.storage.sync.set({ "reversed" : (reversed.reversed != null ? !reversed.reversed : reversedBox.checked) })
     })
 }
 

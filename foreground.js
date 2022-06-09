@@ -4,34 +4,27 @@ sharedPort.onMessage.addListener(function(msg, sender, sendResponse) {
     if (msg.func == "beginObservation") {
         beginObservation(msg.tabId)
     } else if (msg.func == "beginFilter") {
-        // console.log("beginFilter")
         beginFilter(msg.tabId, msg.manual)
     }
-})
-
-sharedPort.onDisconnect.addListener(function() {
-    // console.log("Disconnected")
 })
 
 console.log("Foreground executing")
 
 function beginFilter(tabId, manual) {
+    //console.log("beginFilter")
     chrome.storage.sync.get("automaticEnabled", function(autoenabled) {
         if (autoenabled.automaticEnabled || manual) {
-            chrome.storage.sync.get("data", function(result) {
-                const links = result.data
-                filter(links, tabId)
-            })            
+            getLinks().then(links => { console.log("beginFilter links", links); filter(links, tabId) })
         }
     })
 }
 
 function beginObservation(tabId) {
-    // console.log("beginObservation")
     const observer = new MutationObserver(function(mutationList) {
+        //console.log("MutationObserver triggered")
         beginFilter(tabId, false)
     })
-    const e = document.getElementById("contents")
+    const e = document.getElementById("content")
     if (e != null) {
         observer.observe(e, { childList : true, subtree : true })            
     }
@@ -40,20 +33,33 @@ function beginObservation(tabId) {
 var removedElements = 0
 
 function filter(links, tabId) {
-    var i;
-    for (i = 0; i < (links ? links.length : 0); i++) {
-        if (links[i] != null) {
-            evaluate(links[i])
+    //console.log("filter links: ", links)
+    chrome.storage.sync.get("reversed", function(result) {
+        var i;
+        if (result.reversed) {
+            evaluateReversed(links)
+        } else {
+            for (i = 0; i < (links ? links.length : 0); i++) {
+                if (links[i] != null) {
+                    //console.log("evaluate")
+                    evaluate(links[i])
+                }
+            }    
         }
-    }
-    setRemovedElements(tabId)
+
+        for (var i = 0; i < elementsToRemove.length; i++) {
+            const e = elementsToRemove[i]
+            e.remove()
+            removedElements++
+        }
+        setRemovedElements(tabId)
+        elementsToRemove = []
+    })
 }
 
 function setRemovedElements(tabId) {
-    //console.log(removedElements)
     chrome.storage.sync.get("removedElements", function(result) {
         if (result.removedElements) {
-            //console.log(removedElements)
             result.removedElements[tabId] = removedElements
         } else {
             result.removedElements = []
@@ -63,19 +69,45 @@ function setRemovedElements(tabId) {
     })
 }
 
-function evaluate(link) {
+var elementsToRemove = []
+
+function evaluateReversed(links) {
     const videoElements = document.getElementsByTagName("ytd-video-renderer")
+    for (var i = 0; i < videoElements.length; i++) {
+        const videoElement = videoElements[i]
+        const linkElement = videoElement.getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")[0].getAttribute('href').split("&")[0]
+        var exists = false
+        for (var j = 0; j < links.length; j++) {
+            const link = links[j]
+            if (link.includes(linkElement)) {
+                exists = true
+            }
+        }
+        if (!exists) {
+            elementsToRemove.push(videoElement)
+        }
+    }
+}
+
+function evaluate(link) {
+    //console.log("reversed: ", reversed)
+    //console.log("evaluate link: ", link)
+    const videoElements = document.getElementsByTagName("ytd-video-renderer")
+    console.log("videoElements length: ", videoElements.length)
     var i;
     for (i = 0; i < videoElements.length; i++) {
         const e = videoElements[i].getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")
         var linkElement = videoElements[i].getElementsByClassName("yt-simple-endpoint style-scope ytd-thumbnail")[0]
         if (linkElement) {
             const href = linkElement.getAttribute('href').split("&")[0]
-            if (link.includes(href)) {
-                console.log(href)
-                videoElements[i].remove()
-                removedElements++
-            }    
+            //console.log("link: ", link)
+            //console.log("href: ", href)
+            const exists = link.includes(href)
+            //console.log("exists: ", exists)
+            if (exists) {
+                //console.log(href)
+                elementsToRemove.push(videoElements[i])
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
     "description": "Filter videos you have already seen on the YouTube search results page!",
     "permissions": ["storage", "tabs", "https://www.youtube.com/*"],
     "background": {
-        "scripts": ["background.js"],
+        "scripts": ["links.js", "background.js"],
         "persistent": false
     },
     "browser_action": {
@@ -20,7 +20,7 @@
     "content_scripts": [
         {
             "matches": ["*://*.youtube.com/*"],
-            "js": ["foreground.js"],
+            "js": ["links.js", "foreground.js"],
             "all_frames": true
         }
     ],   

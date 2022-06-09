@@ -1,13 +1,9 @@
 var sharedPort = {}
 
 chrome.runtime.onConnect.addListener(function(port) {
-    console.log("Connected")
+    //console.log("Connected")
     const tabId = latestTab.id
     sharedPort[tabId] = port
-    port.onDisconnect.addListener(function() {
-        // console.log(port)
-        // console.log("Disconnected port")
-    })
 })
 
 var latestTab
@@ -16,7 +12,6 @@ function resetRemovedElementsForCurrentPage(tabId) {
     chrome.storage.sync.get("removedElements", function(result) {
         result.removedElements[tabId] = 0
         chrome.storage.sync.set({ "removedElements": result.removedElements })
-        console.log(result.removedElements[tabId])
     })
 }
 
@@ -42,31 +37,36 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     }
 })
 
-function filterResults(manual) {
+async function filterResults(manual) {
     chrome.tabs.getSelected(null, function(tab) {
         sharedPort[tab.id].postMessage({func: "beginFilter", tabId: tab.id, manual: manual})
     })
 }
 
-function clearList() {
-    chrome.storage.sync.set({ "data" : [] })
+async function clearList() {
+    await chrome.storage.sync.clear()
     chrome.storage.sync.set({ "removedElements" : 0 })
     chrome.storage.sync.set({ "automaticEnabled" : false })
+    chrome.storage.sync.set({ "reversed" : false })
 }
 
-function storeYouTubeLink(link) {
+async function storeYouTubeLink(link) {
     var links = []
-    chrome.storage.sync.get("data", function(result) { 
-        if (result.data != null) { links = result.data }
-        // console.log(links)
-        if (!links.includes(link.split("&")[0])) {
-            links.push(link.split("&")[0])
-        }
-        // console.log(links)
-        chrome.tabs.getSelected(null, function(currentTab) {
-            chrome.storage.sync.set({ "data" : links }, function() { console.log("Link saved."); console.log(currentTab.id); console.log(sharedPort); filterResults(false) })
+    const slot = await getAvailableLinkSlot()
+    const result = await getSlot(slot)
+
+    //console.log("slot: ", slot)
+
+    links = result
+    if (!links.includes(link.split("&")[0])) {
+        links.push(link.split("&")[0])
+    }
+    chrome.tabs.getSelected(null, function(currentTab) {
+        setLinks(links).then(() => {
+            //console.log("Link saved.")
+            filterResults(false)
         })
-    })
+    })    
 }
 
 function isYouTubeSearchPage(url) {
@@ -80,6 +80,7 @@ function isYouTubeVideo(url) {
 }
 
 function evaluateCreation(tab) {
+    console.log("storeYouTubeLink")
     chrome.storage.sync.get("enabled", function(enabled) {
         if (isYouTubeVideo(tab.pendingUrl) && enabled.enabled) {
             storeYouTubeLink(tab.pendingUrl)
