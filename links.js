@@ -1,10 +1,11 @@
 async function check(key) {
-    // 178 links is the maximum amount that can be stored in a single item
+    // 177 links is the maximum amount that can be stored in a single item
     const maxLinksPerSlot = 177
 
     return new Promise((resolve, reject) => {
         chrome.storage.sync.get(key, function(result) {
-            //const slot = result
+            const slot = result
+            //console.log("slot: ", slot)
             if (typeof slot === "undefined") {
                 resolve(true)
             }
