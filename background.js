@@ -75,7 +75,7 @@ function isYouTubeSearchPage(url) {
 }
 
 function isYouTubeVideo(url) {
-    const videoLinkFormat = "watch?"
+    const videoLinkFormat = "watch?v="
     return url.includes(videoLinkFormat)
 }
 
