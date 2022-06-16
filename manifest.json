@@ -1,6 +1,6 @@
 {
     "name": "YouTube Watched Filter",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Filter videos you have already seen on the YouTube search results page!",
     "permissions": ["storage", "tabs", "https://www.youtube.com/*"],
     "background": {
