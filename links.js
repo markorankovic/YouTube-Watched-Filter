@@ -13,6 +13,9 @@ async function check(key) {
             if (!slot[key]) {
                 resolve(true)
             }
+            if (!slot[key].length) {
+                resolve(true)
+            }
             //console.log("maxLinksPerSlot: ", maxLinksPerSlot)
             if (slot[key].length < maxLinksPerSlot) {
                 resolve(true)
