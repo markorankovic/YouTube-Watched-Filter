@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     chrome.tabs.getSelected(null, function(tab) {
         chrome.storage.sync.get("removedElements", function(result) {
+            if (!result?.removedElements) return
             const txt = document.getElementById("filteredOnPage")
             txt.textContent = "Filtered on page: " + (result?.removedElements[tab.id] ?? 0)
         })

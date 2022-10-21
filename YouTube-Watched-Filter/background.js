@@ -10,6 +10,7 @@ var latestTab
 
 function resetRemovedElementsForCurrentPage(tabId) {
     chrome.storage.sync.get("removedElements", function(result) {
+        if (!result.removedElements) return
         result.removedElements[tabId] = 0
         chrome.storage.sync.set({ "removedElements": result.removedElements })
     })
