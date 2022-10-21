@@ -51,18 +51,19 @@ async function clearList() {
 }
 
 async function storeYouTubeLink(link) {
-    var links = []
-    const slot = await getAvailableLinkSlot()
-    const result = await getSlot(slot)
+    const videoId = trimToId(link)
+    //var links = []
+    //const slot = await getAvailableLinkSlot()
+    //const result = await getSlot(slot)
 
     //console.log("slot: ", slot)
 
-    links = result
-    if (!links.includes(link.split("&")[0])) {
-        links.push(link.split("&")[0])
-    }
+    // links = result
+    // if (!links.includes(link.split("&")[0])) {
+    //     links.push(link.split("&")[0])
+    // }
     chrome.tabs.getSelected(null, function(currentTab) {
-        setLinks(links).then(() => {
+        setLinks(videoId).then(() => {
             //console.log("Link saved.")
             filterResults(false)
         })

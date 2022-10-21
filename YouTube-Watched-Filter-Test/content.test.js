@@ -27,6 +27,16 @@ beforeAll(async () => {
     page = await initialize()
 })
 
+test('YouTube link is trimmed to video ID', async () => {
+    const expectedRes = 'azfup51PURc'  
+
+    await page.evaluate(async () => {
+        const someLink = 'https://www.youtube.com/watch?v=azfup51PURc'
+        return trimToId(someLink)
+    })
+    .then(res => expect(res).toBe(expectedRes))    
+})
+
 test('List of videos is empty', async () => {
     await page.evaluate(async () => {
         const length = getLinks().length
