@@ -1,17 +1,44 @@
 console.log('foreground.js executing')
 
-function checkIfPageLoaded() {
-    if (document.readyState === 'interactive' || document.readyState === 'completed') return true
-    return false
+function filterVideos() {
+    console.log('Filtering videos')
 }
 
-console.log('Ready to filter: ', checkIfPageLoaded())
+function onYouTubeSearchResultsPage() {
+    const searchURL = 'https://www.youtube.com/results?search_query'
+    const currentURL = document.location.href
+    return currentURL.includes(searchURL)
+}
 
-// function contentLoaded(event) {
-//     console.log('DOM content loaded: ', event)
-// }
+function trackChangesToContents() {
+    const targetNode = document.getElementById('content')
+    const config = { childList: true, subtree: true }
+    var videosCount = 0
 
-// document.addEventListener('DOMContentLoaded', contentLoaded)
+    function contentsMutated(mutationList) {
+        if (!onYouTubeSearchResultsPage()) return
+        for (const mutation of mutationList) {
+            if (mutation.type === 'childList') {
+                const videoResultClassName = 'ytd-video-renderer'
+                const newVideosCount = document.getElementsByTagName(videoResultClassName).length
+                if (newVideosCount !== videosCount) { // After a mutation to the contents, if the number of videos found is different to previous mutation
+                    filterVideos() // Call the filter function
+                    videosCount = newVideosCount
+                }
+            }
+            else console.log('Changes made to subtree')
+        }
+    }
+
+    const observer = new MutationObserver(contentsMutated)
+    observer.observe(targetNode, config)
+}
+
+function initialize() {
+    trackChangesToContents()
+}
+
+initialize()
 
 // -------------------------------------------------------------------------
 
@@ -34,8 +61,9 @@ console.log('Ready to filter: ', checkIfPageLoaded())
 // }
 
 // function beginObservation(tabId) {
-//     const observer = new MutationObserver(function(mutationList) {br
-//         beginFilter(tabId, false)
+//     const observer = new MutationObserver(function(mutationList) {
+//         console.log('Mutation detected')
+//         //beginFilter(tabId, false)
 //     })
 //     const e = document.getElementById("content")
 //     if (e != null) {
