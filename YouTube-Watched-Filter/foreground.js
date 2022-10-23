@@ -4,7 +4,7 @@ function filterVideos() {
     console.log('Filtering videos')
 }
 
-onPage(URL) {
+function onPage(URL) {
     return getCurrentURL().includes(URL)
 }
 
