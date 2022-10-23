@@ -4,14 +4,16 @@ function filterVideos() {
     console.log('Filtering videos')
 }
 
+onPage(URL) {
+    return getCurrentURL().includes(URL)
+}
+
 function onYouTubeSearchResultsPage() {
-    const searchURL = 'https://www.youtube.com/results?search_query'
-    return getCurrentURL().includes(searchURL)
+    return onPage('https://www.youtube.com/results?search_query')
 }
 
 function onYouTubeVideo() {
-    const videoURL = 'https://www.youtube.com/watch?v='
-    return getCurrentURL().includes(videoURL)
+    return onPage('https://www.youtube.com/watch?v=')
 }
 
 function getCurrentURL() {
