@@ -2,12 +2,12 @@
     "name": "YouTube Watched Filter",
     "version": "1.1.1",
     "description": "Filter videos you have already seen on the YouTube search results page!",
-    "permissions": ["storage", "tabs", "https://www.youtube.com/*"],
+    "permissions": ["storage", "tabs", "scripting"],
+    "host_permissions": ["https://www.youtube.com/*"],
     "background": {
-        "scripts": ["links.js", "background.js"],
-        "persistent": false
+        "service_worker": "background.js"
     },
-    "browser_action": {
+    "action": {
         "default_popup": "./popup.html"
     },
     "options_page": "./options.html",
@@ -20,9 +20,9 @@
     "content_scripts": [
         {
             "matches": ["*://*.youtube.com/*"],
-            "js": ["links.js", "foreground.js"],
+            "js": ["foreground.js", "links.js"],
             "all_frames": true
         }
     ],   
-    "manifest_version": 2
+    "manifest_version": 3
 }

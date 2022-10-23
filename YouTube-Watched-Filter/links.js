@@ -9,18 +9,15 @@ async function check(key) {
     return new Promise((resolve, reject) => {
         chrome.storage.sync.get(key, function(result) {
             const slot = result
-            //console.log("slot: ", slot)
             if (typeof slot === "undefined") {
                 resolve(true)
             }
-            //console.log("slot[key]: ", slot[key])
             if (!slot[key]) {
                 resolve(true)
             }
             if (!slot[key].length) {
                 resolve(true)
             }
-            //console.log("maxLinksPerSlot: ", maxLinksPerSlot)
             if (slot[key].length < maxLinksPerSlot) {
                 resolve(true)
             }
@@ -67,7 +64,6 @@ async function getLinksFromAllSlots() {
             }   
             links.push(...slot)
         }
-        //console.log("Total links length: ", links.length)
         resolve(links)
     })
 }
@@ -79,7 +75,6 @@ async function setLinks(links) {
         var pair = {}
         pair[slot] = links
         chrome.storage.sync.set(pair, function() {
-            //console.log("Links set at: ", slot)
             resolve()
         })
     })
