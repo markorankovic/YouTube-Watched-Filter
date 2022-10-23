@@ -1,3 +1,5 @@
+console.log('background.js executing')
+
 // var sharedPort = {}
 
 // chrome.runtime.onConnect.addListener(function(port) {

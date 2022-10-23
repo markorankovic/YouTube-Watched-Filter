@@ -1,3 +1,20 @@
+console.log('foreground.js executing')
+
+function checkIfPageLoaded() {
+    if (document.readyState === 'interactive' || document.readyState === 'completed') return true
+    return false
+}
+
+console.log('Ready to filter: ', checkIfPageLoaded())
+
+// function contentLoaded(event) {
+//     console.log('DOM content loaded: ', event)
+// }
+
+// document.addEventListener('DOMContentLoaded', contentLoaded)
+
+// -------------------------------------------------------------------------
+
 // var sharedPort = chrome.runtime.connect()
 
 // sharedPort.onMessage.addListener(function(msg, sender, sendResponse) {
