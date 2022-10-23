@@ -6,28 +6,61 @@ function filterVideos() {
 
 function onYouTubeSearchResultsPage() {
     const searchURL = 'https://www.youtube.com/results?search_query'
-    const currentURL = document.location.href
-    return currentURL.includes(searchURL)
+    return getCurrentURL().includes(searchURL)
+}
+
+function onYouTubeVideo() {
+    const videoURL = 'https://www.youtube.com/watch?v='
+    return getCurrentURL().includes(videoURL)
+}
+
+function getCurrentURL() {
+    return document.location.href
+}
+
+function addVideoToFilter() {
+    console.log('Adding video to filter');
 }
 
 function trackChangesToContents() {
     const targetNode = document.getElementById('content')
     const config = { childList: true, subtree: true }
     var videosCount = 0
+    var currentURL = getCurrentURL()
 
     function contentsMutated(mutationList) {
-        if (!onYouTubeSearchResultsPage()) return
-        for (const mutation of mutationList) {
-            if (mutation.type === 'childList') {
-                const videoResultClassName = 'ytd-video-renderer'
-                const newVideosCount = document.getElementsByTagName(videoResultClassName).length
-                if (newVideosCount !== videosCount) { // After a mutation to the contents, if the number of videos found is different to previous mutation
-                    filterVideos() // Call the filter function
-                    videosCount = newVideosCount
-                }
-            }
-            else console.log('Changes made to subtree')
+        const acceptedPages = onYouTubeSearchResultsPage() || onYouTubeVideo()
+        if (!acceptedPages) return
+
+        function evaluateChangesToVideo() {
+            const newVideoURL = getCurrentURL()
+            const switchedVideo = currentURL != newVideoURL
+            if (switchedVideo) {
+                addVideoToFilter()
+                currentURL = newVideoURL
+                return 
+            } // If watching a YouTube video, add it to filter    
         }
+
+        if (onYouTubeVideo()) {
+            evaluateChangesToVideo()
+        }
+
+        function evaluateChangesToSearchResults() {
+            for (const mutation of mutationList) {
+                if (mutation.type === 'childList') {
+                    const videoResultClassName = 'ytd-video-renderer'
+                    const newVideosCount = document.getElementsByTagName(videoResultClassName).length
+                    if (newVideosCount !== videosCount) { // After a mutation to the contents, if the number of videos found is different to previous mutation
+                        filterVideos() // Call the filter function
+                        videosCount = newVideosCount
+                    }
+                }
+                else console.log('Changes made to subtree')
+            }    
+        }
+
+        evaluateChangesToSearchResults()
     }
 
     const observer = new MutationObserver(contentsMutated)
@@ -35,6 +68,7 @@ function trackChangesToContents() {
 }
 
 function initialize() {
+    if (onYouTubeVideo()) addVideoToFilter()
     trackChangesToContents()
 }
 
