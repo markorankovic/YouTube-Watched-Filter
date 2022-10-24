@@ -1,7 +1,28 @@
 console.log('foreground.js executing')
 
+var storedVideos = ['Ri1CNMzydvg'] // TODO: Replace this with the actual storage
+
+function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
+    var videosToRemove = []
+    for (const videoToFilter of videosToFilter) {
+        for (const videoLoaded of videosLoaded) {
+            if (videoElementToVideoId(videoLoaded) == videoToFilter) videosToRemove.push(videoLoaded)
+        }
+    }
+    return videosToRemove
+}
+
+function removeVideosExistingInFilter(videosLoaded) {
+    const videosToFilter = storedVideos // TODO: Replace this with the actual storage
+    const videosWithMatchingIds = getVideosWithMatchingIds(videosLoaded, videosToFilter)
+    for (const videoElement of videosWithMatchingIds) {
+        videoElement.remove()
+    }
+}
+
 function filterWatchedVideos(videos) {
-    console.log('Filtering watched videos: ', videos)
+    //console.log('Filtering watched videos: ', videos)
+    removeVideosExistingInFilter(videos)
 }
 
 function onPage(URL) {
@@ -72,7 +93,7 @@ function trackChangesToContents() {
                     const videoResultClassName = 'ytd-video-renderer'
                     const newVideos = Array.from(document.getElementsByTagName(videoResultClassName))
                     if (!videosAreTheSame(newVideos, videos)) { // After a mutation to the contents, if the number of videos found is different to previous mutation
-                        filterWatchedVideos(newVideos.map(videoElement => videoElementToVideoId(videoElement))) // Call the filter function
+                        filterWatchedVideos(newVideos) // Call the filter function
                         videos = Array.from(newVideos)
                     }
                 }
