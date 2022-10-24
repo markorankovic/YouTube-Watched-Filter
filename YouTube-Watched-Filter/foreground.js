@@ -3,14 +3,6 @@ console.log('foreground.js executing')
 var storedVideos = ['s:0oqOUhFaToQ', 'Ri1CNMzydvg', 'wurRL7HM9Xo', 'InFi80Cf4PQ'] // TODO: Replace this with the actual storage
 const reversed = false
 
-function videosSub(lhs, rhs) {
-    var res = []
-    for (e of lhs) {
-        if (!rhs.includes(e)) res.push(e)
-    }
-    return res
-}
-
 function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
     var videosToRemove = []
     for (const videoToFilter of videosToFilter) {
@@ -18,9 +10,14 @@ function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
             if (videoElementToVideoId(videoLoaded) == videoToFilter) videosToRemove.push(videoLoaded)
         }
     }
+    function videosSub(lhs, rhs) {
+        var res = []
+        for (e of lhs) {
+            if (!rhs.includes(e)) res.push(e)
+        }
+        return res
+    }    
     const reversedVideosToRemove = videosSub(videosLoaded, videosToRemove)
-    const reversedVideosToRemoveInIds = reversedVideosToRemove.map(e => videoElementToVideoId(e))
-    //console.log('reversedVideosToRemoveInIds: ', reversedVideosToRemoveInIds)
     return reversed ? reversedVideosToRemove : videosToRemove
 }
 
