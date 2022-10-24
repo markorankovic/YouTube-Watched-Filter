@@ -1,6 +1,6 @@
 console.log('foreground.js executing')
 
-var storedVideos = ['Ri1CNMzydvg'] // TODO: Replace this with the actual storage
+var storedVideos = ['s:0oqOUhFaToQ', 'Ri1CNMzydvg'] // TODO: Replace this with the actual storage
 
 function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
     var videosToRemove = []
@@ -21,7 +21,8 @@ function removeVideosExistingInFilter(videosLoaded) {
 }
 
 function filterWatchedVideos(videos) {
-    //console.log('Filtering watched videos: ', videos)
+    const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
+    console.log('Filtering watched videos: ', videoIds)
     removeVideosExistingInFilter(videos)
 }
 
@@ -56,11 +57,16 @@ function videosAreTheSame(videos1, videos2) {
 }
 
 function trimToId(link) {
-    return link.replace('https://www.youtube.com/watch?v=', '')
+    const youtubeVideoFormat = 'https://www.youtube.com/watch?v='
+    const youtubeShortsFormat = 'https://www.youtube.com/shorts/'
+    const isYouTubeShorts = link.includes(youtubeShortsFormat)
+    const format = isYouTubeShorts ? youtubeShortsFormat : youtubeVideoFormat
+    return link.replace(format, isYouTubeShorts ? 's:' : '')
 }
 
 function videoElementToVideoId(videoElement) {
-    return trimToId(videoElement.getElementsByTagName('a').thumbnail.href)
+    const videoLink = videoElement.getElementsByTagName('a').thumbnail.href
+    return trimToId(videoLink)
 } 
 
 function trackChangesToContents() {

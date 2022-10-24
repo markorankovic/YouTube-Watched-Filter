@@ -1,7 +1,3 @@
-function trimToId(link) {
-    return link.replace('https://www.youtube.com/watch?v=', '')
-}
-
 async function check(key) {
     // 177 links is the maximum amount that can be stored in a single item
     const maxLinksPerSlot = 177
