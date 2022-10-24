@@ -2,6 +2,7 @@ console.log('foreground.js executing')
 
 var storedVideos = ['s:0oqOUhFaToQ', 'Ri1CNMzydvg', 'wurRL7HM9Xo', 'InFi80Cf4PQ'] // TODO: Replace this with the actual storage
 const reversed = false
+const enabled = true
 
 function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
     var videosToRemove = []
@@ -31,7 +32,8 @@ function removeVideosExistingInFilter(videosLoaded) {
 }
 
 function filterWatchedVideos(videos) {
-    const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
+    if (!enabled) return
+    //const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
     //console.log('Filtering watched videos: ', videoIds)
     removeVideosExistingInFilter(videos)
 }
@@ -53,6 +55,7 @@ function getCurrentURL() {
 }
 
 function addVideoToFilter(videoId) {
+    if (!enabled) return
     console.log('Adding video to filter: ', videoId);
 }
 
@@ -80,7 +83,7 @@ function videoElementToVideoId(videoElement) {
 } 
 
 function trackChangesToContents() {
-    const targetNode = document.getElementById('content')
+    const targetNode = document.getElementById('primary')
     const config = { childList: true, subtree: true }
     var videos = []
     var currentURL = getCurrentURL()
@@ -97,10 +100,6 @@ function trackChangesToContents() {
                 currentURL = newVideoURL
                 return 
             } // If watching a YouTube video, add it to filter    
-        }
-
-        if (onYouTubeVideo()) {
-            evaluateChangesToVideo()
         }
 
         function evaluateChangesToSearchResults() {
@@ -122,11 +121,16 @@ function trackChangesToContents() {
                 else console.log('Changes made to subtree')
             }
         }
-
-        evaluateChangesToSearchResults()
+        
+        if (onYouTubeVideo()) {
+            evaluateChangesToVideo()
+        } else {
+            evaluateChangesToSearchResults()
+        }
     }
 
     const observer = new MutationObserver(contentsMutated)
+    console.log('targetNode: ', targetNode)
     observer.observe(targetNode, config)
 }
 
