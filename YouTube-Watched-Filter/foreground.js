@@ -1,6 +1,6 @@
 console.log('foreground.js executing')
 
-var storedVideos = ['s:0oqOUhFaToQ', 'Ri1CNMzydvg'] // TODO: Replace this with the actual storage
+var storedVideos = ['s:0oqOUhFaToQ', 'Ri1CNMzydvg', 'wurRL7HM9Xo'] // TODO: Replace this with the actual storage
 
 function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
     var videosToRemove = []
@@ -17,12 +17,13 @@ function removeVideosExistingInFilter(videosLoaded) {
     const videosWithMatchingIds = getVideosWithMatchingIds(videosLoaded, videosToFilter)
     for (const videoElement of videosWithMatchingIds) {
         videoElement.remove()
+        console.log('Video ' + videoElementToVideoId(videoElement) + 'has been removed')
     }
 }
 
 function filterWatchedVideos(videos) {
     const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
-    console.log('Filtering watched videos: ', videoIds)
+    //console.log('Filtering watched videos: ', videoIds)
     removeVideosExistingInFilter(videos)
 }
 
@@ -99,8 +100,14 @@ function trackChangesToContents() {
                     const videoResultClassName = 'ytd-video-renderer'
                     const newVideos = Array.from(document.getElementsByTagName(videoResultClassName))
                     if (!videosAreTheSame(newVideos, videos)) { // After a mutation to the contents, if the number of videos found is different to previous mutation
-                        filterWatchedVideos(newVideos) // Call the filter function
-                        videos = Array.from(newVideos)
+                        function newlyLoadedVideos(newVideos, videos) { // Only new videos that haven't gone through the filter will be processed
+                            return newVideos.filter(newVideo => !videos.includes(newVideo))
+                        }
+                        const newlyLoadedVideoElements = newlyLoadedVideos(newVideos, videos)
+                        if (newlyLoadedVideoElements.length > 0) {
+                            filterWatchedVideos(newlyLoadedVideoElements) // Call the filter function
+                            videos = Array.from(newVideos)
+                        }
                     }
                 }
                 else console.log('Changes made to subtree')
