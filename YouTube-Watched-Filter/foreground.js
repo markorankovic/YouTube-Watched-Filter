@@ -1,7 +1,7 @@
 console.log('foreground.js executing')
 
-function filterWatchedVideos() {
-    console.log('Filtering watched videos')
+function filterWatchedVideos(videos) {
+    console.log('Filtering watched videos: ', videos)
 }
 
 function onPage(URL) {
@@ -27,8 +27,8 @@ function addVideoToFilter(videoId) {
 function videosAreTheSame(videos1, videos2) {
     if (videos1.length != videos2.length) return false 
     for (var i = 0; i < videos1.length; i++) {
-        const videoLink1 = videos1[i].getElementsByTagName('a').thumbnail.href
-        const videoLink2 = videos2[i].getElementsByTagName('a').thumbnail.href
+        const videoLink1 = videoElementToVideoId(videos1[i])
+        const videoLink2 = videoElementToVideoId(videos2[i])
         if (videoLink1 != videoLink2) return false
     }
     return true
@@ -37,6 +37,10 @@ function videosAreTheSame(videos1, videos2) {
 function trimToId(link) {
     return link.replace('https://www.youtube.com/watch?v=', '')
 }
+
+function videoElementToVideoId(videoElement) {
+    return trimToId(videoElement.getElementsByTagName('a').thumbnail.href)
+} 
 
 function trackChangesToContents() {
     const targetNode = document.getElementById('content')
@@ -68,7 +72,7 @@ function trackChangesToContents() {
                     const videoResultClassName = 'ytd-video-renderer'
                     const newVideos = Array.from(document.getElementsByTagName(videoResultClassName))
                     if (!videosAreTheSame(newVideos, videos)) { // After a mutation to the contents, if the number of videos found is different to previous mutation
-                        filterWatchedVideos() // Call the filter function
+                        filterWatchedVideos(newVideos.map(videoElement => videoElementToVideoId(videoElement))) // Call the filter function
                         videos = Array.from(newVideos)
                     }
                 }
