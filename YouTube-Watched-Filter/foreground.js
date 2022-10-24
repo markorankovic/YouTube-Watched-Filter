@@ -24,10 +24,20 @@ function addVideoToFilter() {
     console.log('Adding video to filter');
 }
 
+function videosAreTheSame(videos1, videos2) {
+    if (videos1.length != videos2.length) return false 
+    for (var i = 0; i < videos1.length; i++) {
+        const videoLink1 = videos1[i].getElementsByTagName('a').thumbnail.href
+        const videoLink2 = videos2[i].getElementsByTagName('a').thumbnail.href
+        if (videoLink1 != videoLink2) return false
+    }
+    return true
+}
+
 function trackChangesToContents() {
     const targetNode = document.getElementById('content')
     const config = { childList: true, subtree: true }
-    var videosCount = 0
+    var videos = []
     var currentURL = getCurrentURL()
 
     function contentsMutated(mutationList) {
@@ -52,14 +62,14 @@ function trackChangesToContents() {
             for (const mutation of mutationList) {
                 if (mutation.type === 'childList') {
                     const videoResultClassName = 'ytd-video-renderer'
-                    const newVideosCount = document.getElementsByTagName(videoResultClassName).length
-                    if (newVideosCount !== videosCount) { // After a mutation to the contents, if the number of videos found is different to previous mutation
+                    const newVideos = Array.from(document.getElementsByTagName(videoResultClassName))
+                    if (!videosAreTheSame(newVideos, videos)) { // After a mutation to the contents, if the number of videos found is different to previous mutation
                         filterWatchedVideos() // Call the filter function
-                        videosCount = newVideosCount
+                        videos = Array.from(newVideos)
                     }
                 }
                 else console.log('Changes made to subtree')
-            }    
+            }
         }
 
         evaluateChangesToSearchResults()
