@@ -20,8 +20,8 @@ function getCurrentURL() {
     return document.location.href
 }
 
-function addVideoToFilter() {
-    console.log('Adding video to filter');
+function addVideoToFilter(videoId) {
+    console.log('Adding video to filter: ', videoId);
 }
 
 function videosAreTheSame(videos1, videos2) {
@@ -32,6 +32,10 @@ function videosAreTheSame(videos1, videos2) {
         if (videoLink1 != videoLink2) return false
     }
     return true
+}
+
+function trimToId(link) {
+    return link.replace('https://www.youtube.com/watch?v=', '')
 }
 
 function trackChangesToContents() {
@@ -48,7 +52,7 @@ function trackChangesToContents() {
             const newVideoURL = getCurrentURL()
             const switchedVideo = currentURL != newVideoURL
             if (switchedVideo) {
-                addVideoToFilter()
+                addVideoToFilter(trimToId(newVideoURL))
                 currentURL = newVideoURL
                 return 
             } // If watching a YouTube video, add it to filter    
@@ -80,7 +84,7 @@ function trackChangesToContents() {
 }
 
 function initialize() {
-    if (onYouTubeVideo()) addVideoToFilter()
+    if (onYouTubeVideo()) addVideoToFilter(trimToId(getCurrentURL()))
     trackChangesToContents()
 }
 
