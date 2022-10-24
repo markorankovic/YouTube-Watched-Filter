@@ -1,7 +1,7 @@
 console.log('foreground.js executing')
 
-function filterVideos() {
-    console.log('Filtering videos')
+function filterWatchedVideos() {
+    console.log('Filtering watched videos')
 }
 
 function onPage(URL) {
@@ -54,7 +54,7 @@ function trackChangesToContents() {
                     const videoResultClassName = 'ytd-video-renderer'
                     const newVideosCount = document.getElementsByTagName(videoResultClassName).length
                     if (newVideosCount !== videosCount) { // After a mutation to the contents, if the number of videos found is different to previous mutation
-                        filterVideos() // Call the filter function
+                        filterWatchedVideos() // Call the filter function
                         videosCount = newVideosCount
                     }
                 }
