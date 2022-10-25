@@ -1,5 +1,18 @@
 console.log('background.js executing')
 
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if (request.videoId) {
+            sendResponse('Video ' + request.videoId + ' has been received')
+            storeVideo(request.videoId)
+        }
+    }
+)
+
+function storeVideo(videoId) {
+    console.log('Storing video ' + videoId)
+}
+
 // var sharedPort = {}
 
 // chrome.runtime.onConnect.addListener(function(port) {

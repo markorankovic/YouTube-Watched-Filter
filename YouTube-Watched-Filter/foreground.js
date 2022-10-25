@@ -4,6 +4,11 @@ var storedVideos = ['s:0oqOUhFaToQ', 'Ri1CNMzydvg', 'wurRL7HM9Xo', 'InFi80Cf4PQ'
 const reversed = false
 const enabled = true
 
+function passWatchedVideo(videoId) {
+    console.log('Passing watched video:', videoId)
+    chrome.runtime.sendMessage({videoId : videoId}, (res) => console.log(res))
+}
+
 function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
     var videosToRemove = []
     for (const videoToFilter of videosToFilter) {
@@ -56,7 +61,8 @@ function getCurrentURL() {
 
 function addVideoToFilter(videoId) {
     if (!enabled) return
-    console.log('Adding video to filter: ', videoId);
+    //console.log('Adding video to filter: ', videoId);
+    passWatchedVideo(videoId)
 }
 
 function videosAreTheSame(videos1, videos2) {
@@ -83,7 +89,7 @@ function videoElementToVideoId(videoElement) {
 } 
 
 function trackChangesToContents() {
-    const targetNode = document.getElementById('primary')
+    const targetNode = document.activeElement
     const config = { childList: true, subtree: true }
     var videos = []
     var currentURL = getCurrentURL()
