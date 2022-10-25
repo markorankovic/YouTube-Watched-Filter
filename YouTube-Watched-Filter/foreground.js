@@ -130,7 +130,6 @@ function trackChangesToContents() {
     }
 
     const observer = new MutationObserver(contentsMutated)
-    console.log('targetNode: ', targetNode)
     observer.observe(targetNode, config)
 }
 
