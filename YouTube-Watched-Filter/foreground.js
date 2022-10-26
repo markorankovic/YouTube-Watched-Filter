@@ -28,7 +28,12 @@ function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
 
 async function getStoredVideos() {
     return new Promise(function(resolve, reject) {
-        chrome.runtime.sendMessage({message : 'getVideos'}, (res) => { resolve(res.videos) })
+        chrome.runtime.sendMessage(
+            {message : 'getVideos'},
+            (res) => {
+                // console.log('Received videos:', res.videos)
+                resolve(res.videos) 
+            })
     })
 }
 
@@ -58,6 +63,10 @@ function onYouTubeSearchResultsPage() {
 
 function onYouTubeVideo() {
     return onPage('https://www.youtube.com/watch?v=')
+}
+
+function onYouTubeShorts() {
+    return onPage('https://www.youtube.com/shorts/')
 }
 
 function getCurrentURL() {
@@ -94,13 +103,13 @@ function videoElementToVideoId(videoElement) {
 } 
 
 function trackChangesToContents() {
-    const targetNode = document.activeElement
+    const targetNode = document.body
     const config = { childList: true, subtree: true }
     var videos = []
     var currentURL = getCurrentURL()
 
     function contentsMutated(mutationList) {
-        const acceptedPages = onYouTubeSearchResultsPage() || onYouTubeVideo()
+        const acceptedPages = onYouTubeSearchResultsPage() || onYouTubeVideo() || onYouTubeShorts()
         if (!acceptedPages) return
 
         function evaluateChangesToVideo() {
@@ -133,7 +142,7 @@ function trackChangesToContents() {
             }
         }
         
-        if (onYouTubeVideo()) {
+        if (onYouTubeVideo() || onYouTubeShorts()) {
             evaluateChangesToVideo()
         } else {
             evaluateChangesToSearchResults()
@@ -141,11 +150,11 @@ function trackChangesToContents() {
     }
 
     const observer = new MutationObserver(contentsMutated)
-    observer.observe(targetNode, config)
+    observer.observe(targetNode, config)    
 }
 
 function initialize() {
-    if (onYouTubeVideo()) addVideoToFilter(trimToId(getCurrentURL()))
+    if (onYouTubeVideo() || onYouTubeShorts()) addVideoToFilter(trimToId(getCurrentURL()))
     trackChangesToContents()
 }
 

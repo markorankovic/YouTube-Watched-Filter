@@ -23,7 +23,9 @@ chrome.runtime.onMessage.addListener(
             sendResponse('Video ' + request.videoId + ' has been received')
             videos.store(request.videoId)
         } else if (request.message == 'getVideos') {
-            sendResponse({videos: videos.get()})
+            const videosToSend = videos.get()
+            // console.log('Videos to send:', videosToSend)
+            sendResponse({videos: videosToSend})
         }
     }
 )
