@@ -1,17 +1,32 @@
 console.log('background.js executing')
 
+class VideoStore {
+    videos = new Set()
+
+    constructor() {}
+
+    get() {
+        return Array.from(this.videos)
+    }
+
+    store(videoId) {
+        console.log('Storing video ' + videoId)
+        this.videos.add(videoId)
+    }
+}
+
+const videos = new VideoStore()
+
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.videoId) {
             sendResponse('Video ' + request.videoId + ' has been received')
-            storeVideo(request.videoId)
+            videos.store(request.videoId)
+        } else if (request.message == 'getVideos') {
+            sendResponse({videos: videos.get()})
         }
     }
 )
-
-function storeVideo(videoId) {
-    console.log('Storing video ' + videoId)
-}
 
 // var sharedPort = {}
 

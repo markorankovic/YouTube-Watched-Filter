@@ -1,6 +1,5 @@
 console.log('foreground.js executing')
 
-var storedVideos = ['s:0oqOUhFaToQ', 'Ri1CNMzydvg', 'wurRL7HM9Xo', 'InFi80Cf4PQ'] // TODO: Replace this with the actual storage
 const reversed = false
 const enabled = true
 
@@ -27,12 +26,18 @@ function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
     return reversed ? reversedVideosToRemove : videosToRemove
 }
 
-function removeVideosExistingInFilter(videosLoaded) {
-    const videosToFilter = storedVideos // TODO: Replace this with the actual storage
+async function getStoredVideos() {
+    return new Promise(function(resolve, reject) {
+        chrome.runtime.sendMessage({message : 'getVideos'}, (res) => { resolve(res.videos) })
+    })
+}
+
+async function removeVideosExistingInFilter(videosLoaded) {
+    const videosToFilter = await getStoredVideos()
     const videosWithMatchingIds = getVideosWithMatchingIds(videosLoaded, videosToFilter)
     for (const videoElement of videosWithMatchingIds) {
         videoElement.remove()
-        console.log('Video ' + videoElementToVideoId(videoElement) + 'has been removed')
+        console.log('Video ' + videoElementToVideoId(videoElement) + ' has been removed')
     }
 }
 
