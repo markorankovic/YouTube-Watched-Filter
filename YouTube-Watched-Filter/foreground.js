@@ -102,31 +102,22 @@ function videoElementToVideoId(videoElement) {
     return trimToId(videoLink)
 } 
 
-function trackChangesToContents() {
+function getVideoResultsOnPage() {
+    const videoResultClassName = 'ytd-video-renderer'
+    return Array.from(document.getElementsByTagName(videoResultClassName))
+}
+
+function trackChangesToSearchResults() {
     const targetNode = document.body
     const config = { childList: true, subtree: true }
     var videos = []
-    var currentURL = getCurrentURL()
 
-    function contentsMutated(mutationList) {
-        const acceptedPages = onYouTubeSearchResultsPage() || onYouTubeVideo() || onYouTubeShorts()
-        if (!acceptedPages) return
-
-        function evaluateChangesToVideo() {
-            const newVideoURL = getCurrentURL()
-            const switchedVideo = currentURL != newVideoURL
-            if (switchedVideo) {
-                addVideoToFilter(trimToId(newVideoURL))
-                currentURL = newVideoURL
-                return 
-            } // If watching a YouTube video, add it to filter    
-        }
+    function searchResultsMutated(mutationList) {
 
         function evaluateChangesToSearchResults() {
             for (const mutation of mutationList) {
                 if (mutation.type === 'childList') {
-                    const videoResultClassName = 'ytd-video-renderer'
-                    const newVideos = Array.from(document.getElementsByTagName(videoResultClassName))
+                    const newVideos = getVideoResultsOnPage()
                     if (!videosAreTheSame(newVideos, videos)) { // After a mutation to the contents, if the number of videos found is different to previous mutation
                         function newlyLoadedVideos(newVideos, videos) { // Only new videos that haven't gone through the filter will be processed
                             return newVideos.filter(newVideo => !videos.includes(newVideo))
@@ -142,20 +133,36 @@ function trackChangesToContents() {
             }
         }
         
-        if (onYouTubeVideo() || onYouTubeShorts()) {
-            evaluateChangesToVideo()
-        } else {
-            evaluateChangesToSearchResults()
-        }
+        evaluateChangesToSearchResults()
     }
 
-    const observer = new MutationObserver(contentsMutated)
+    const observer = new MutationObserver(searchResultsMutated)
     observer.observe(targetNode, config)    
+}
+
+function onURLChangedHandler() {
+    if (onYouTubeVideo() || onYouTubeShorts()) {
+        console.log('Now watching video')
+        addVideoToFilter(trimToId(getCurrentURL()))
+    } else if (onYouTubeSearchResultsPage) {
+        console.log('Now searching for videos')
+        filterWatchedVideos(getVideoResultsOnPage());
+        trackChangesToSearchResults()
+    }
+}
+
+function listenForURLChanges() {
+    chrome.runtime.onMessage.addListener(
+        function(req, sender, res) {
+            if (req.message == 'urlChanged') onURLChangedHandler()
+        }
+    )    
 }
 
 function initialize() {
     if (onYouTubeVideo() || onYouTubeShorts()) addVideoToFilter(trimToId(getCurrentURL()))
-    trackChangesToContents()
+    else if (onYouTubeSearchResultsPage()) filterWatchedVideos(getVideoResultsOnPage()); trackChangesToSearchResults()
+    listenForURLChanges()
 }
 
 initialize()

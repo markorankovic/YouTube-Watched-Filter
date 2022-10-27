@@ -1,7 +1,7 @@
 console.log('background.js executing')
 
 class VideoStore {
-    videos = new Set()
+    videos = new Set() // TODO: Check why this is not reliably storing videos
 
     constructor() {}
 
@@ -26,6 +26,15 @@ chrome.runtime.onMessage.addListener(
             const videosToSend = videos.get()
             // console.log('Videos to send:', videosToSend)
             sendResponse({videos: videosToSend})
+        }
+    }
+)
+
+chrome.tabs.onUpdated.addListener(
+    function(tabId, changeInfo, tab) {
+        if (changeInfo.url) {
+            console.log('URL changed at tab: ', tabId)
+            chrome.tabs.sendMessage(tabId, { message : 'urlChanged' }).catch(err => console.log('Error messaging tab: ', err))
         }
     }
 )
