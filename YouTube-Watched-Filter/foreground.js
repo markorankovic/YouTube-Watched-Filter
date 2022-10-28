@@ -40,6 +40,7 @@ async function getExistingVideos(videosLoaded) {
 async function removeVideosExistingInFilter(videosLoaded) {
     const videosToFilter = await getExistingVideos(videosLoaded)
     const matchingVideos = getVideosWithMatchingIds(videosLoaded, videosToFilter)
+    // console.log('Videos to remove: ', matchingVideos)
     for (const videoElement of matchingVideos) {
         videoElement.remove()
         console.log('Video ' + videoElementToVideoId(videoElement) + ' has been removed')
@@ -48,8 +49,8 @@ async function removeVideosExistingInFilter(videosLoaded) {
 
 function filterWatchedVideos(videos) {
     if (!enabled) return
-    //const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
-    //console.log('Filtering watched videos: ', videoIds)
+    // const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
+    // console.log('Filtering watched videos: ', videoIds)
     removeVideosExistingInFilter(videos)
 }
 
@@ -160,8 +161,8 @@ function listenForURLChanges() {
 }
 
 function initialize() {
-    evaluatePage()
     listenForURLChanges()
+    evaluatePage()
 }
 
 initialize()
