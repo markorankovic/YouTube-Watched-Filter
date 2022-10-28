@@ -140,7 +140,7 @@ function trackChangesToSearchResults() {
     observer.observe(targetNode, config)    
 }
 
-function onURLChangedHandler() {
+function evaluatePage() {
     if (onYouTubeVideo() || onYouTubeShorts()) {
         console.log('Now watching video')
         addVideoToFilter(trimToId(getCurrentURL()))
@@ -154,14 +154,13 @@ function onURLChangedHandler() {
 function listenForURLChanges() {
     chrome.runtime.onMessage.addListener(
         function(req, sender, res) {
-            if (req.message == 'urlChanged') onURLChangedHandler()
+            if (req.message == 'urlChanged') evaluatePage()
         }
     )    
 }
 
 function initialize() {
-    if (onYouTubeVideo() || onYouTubeShorts()) addVideoToFilter(trimToId(getCurrentURL()))
-    else if (onYouTubeSearchResultsPage()) filterWatchedVideos(getVideoResultsOnPage()); trackChangesToSearchResults()
+    evaluatePage()
     listenForURLChanges()
 }
 
