@@ -26,10 +26,10 @@ function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
     return reversed ? reversedVideosToRemove : videosToRemove
 }
 
-async function getStoredVideos() {
+async function getExistingVideos(videosLoaded) {
     return new Promise(function(resolve, reject) {
         chrome.runtime.sendMessage(
-            {message : 'getVideos'},
+            {message : 'filterVideos', videosLoaded : videosLoaded.map(video => videoElementToVideoId(video))},
             (res) => {
                 // console.log('Received videos:', res.videos)
                 resolve(res.videos) 
@@ -38,9 +38,9 @@ async function getStoredVideos() {
 }
 
 async function removeVideosExistingInFilter(videosLoaded) {
-    const videosToFilter = await getStoredVideos()
-    const videosWithMatchingIds = getVideosWithMatchingIds(videosLoaded, videosToFilter)
-    for (const videoElement of videosWithMatchingIds) {
+    const videosToFilter = await getExistingVideos(videosLoaded)
+    const matchingVideos = getVideosWithMatchingIds(videosLoaded, videosToFilter)
+    for (const videoElement of matchingVideos) {
         videoElement.remove()
         console.log('Video ' + videoElementToVideoId(videoElement) + ' has been removed')
     }

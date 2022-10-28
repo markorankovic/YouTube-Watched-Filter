@@ -5,8 +5,9 @@ class VideoStore {
 
     constructor() {}
 
-    get() {
-        return Array.from(this.videos)
+    filter(videosLoaded) {
+        // console.log('Videos received for filter: ', videosLoaded)
+        return videosLoaded.filter(video => this.videos.has(video))
     }
 
     store(videoId) {
@@ -22,8 +23,8 @@ chrome.runtime.onMessage.addListener(
         if (request.videoId) {
             sendResponse('Video ' + request.videoId + ' has been received')
             videos.store(request.videoId)
-        } else if (request.message == 'getVideos') {
-            const videosToSend = videos.get()
+        } else if (request.message == 'filterVideos') {
+            const videosToSend = videos.filter(request.videosLoaded)
             // console.log('Videos to send:', videosToSend)
             sendResponse({videos: videosToSend})
         }
