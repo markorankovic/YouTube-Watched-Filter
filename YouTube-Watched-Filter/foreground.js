@@ -41,17 +41,30 @@ async function removeVideosExistingInFilter(videosLoaded) {
     const videosToFilter = await getExistingVideos(videosLoaded)
     const matchingVideos = getVideosWithMatchingIds(videosLoaded, videosToFilter)
     // console.log('Videos to remove: ', matchingVideos)
-    for (const videoElement of matchingVideos) {
+    removeVideos(matchingVideos)
+}
+
+function removeVideos(videos) {
+    for (const videoElement of videos) {
         videoElement.remove()
         console.log('Video ' + videoElementToVideoId(videoElement) + ' has been removed')
     }
+}
+
+function removeUnfinishedVideos(videos) {
+    // console.log('Videos: ', videos)
+    function videoElementHasProgressBar(video) {
+        return video.getElementsByTagName('ytd-thumbnail-overlay-resume-playback-renderer').length > 0
+    }
+    removeVideos(videos.filter(video => videoElementHasProgressBar(video)))
 }
 
 function filterWatchedVideos(videos) {
     if (!enabled) return
     // const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
     // console.log('Filtering watched videos: ', videoIds)
-    removeVideosExistingInFilter(videos)
+    // removeVideosExistingInFilter(videos)
+    removeUnfinishedVideos(videos)
 }
 
 function onPage(URL) {
@@ -119,6 +132,7 @@ function trackChangesToSearchResults() {
             for (const mutation of mutationList) {
                 if (mutation.type === 'childList') {
                     const newVideos = getVideoResultsOnPage()
+                    removeUnfinishedVideos(newVideos)
                     if (!videosAreTheSame(newVideos, videos)) { // After a mutation to the contents, if the number of videos found is different to previous mutation
                         function newlyLoadedVideos(newVideos, videos) { // Only new videos that haven't gone through the filter will be processed
                             return newVideos.filter(newVideo => !videos.includes(newVideo))
