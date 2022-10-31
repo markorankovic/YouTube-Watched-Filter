@@ -63,7 +63,7 @@ function filterWatchedVideos(videos) {
     if (!enabled) return
     // const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
     // console.log('Filtering watched videos: ', videoIds)
-    // removeVideosExistingInFilter(videos)
+    removeVideosExistingInFilter(videos)
     removeUnfinishedVideos(videos)
 }
 
