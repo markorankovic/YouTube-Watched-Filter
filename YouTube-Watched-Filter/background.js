@@ -1,7 +1,7 @@
 console.log('background.js executing')
 
 class VideoStore {
-    videos = new Set() // TODO: Check why this is not reliably storing videos
+    videos = new Set()
 
     constructor() {}
 
