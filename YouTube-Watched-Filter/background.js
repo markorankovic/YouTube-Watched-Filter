@@ -3,16 +3,42 @@ console.log('background.js executing')
 class VideoStore {
     videos = new Set()
 
-    constructor() {}
+    constructor() {
+        setTimeout(() => {
+            console.log('Timeout done')
+            this.load()
+        }, 10000)
+    }
 
     filter(videosLoaded) {
         // console.log('Videos received for filter: ', videosLoaded)
         return videosLoaded.filter(video => this.videos.has(video))
     }
 
+    async load() {
+        chrome.storage.sync.get('watchedVids')
+            .then(res => {
+                if (res?.watchedVids?.length) {
+                    this.videos = new Set(res.watchedVids)
+                    // Call for filter on current tab
+                }
+            })
+    }
+
+    async storeInSync() {
+        // console.log('Videos to store: ', this.videos)
+        chrome.storage.sync.set({'watchedVids' : Array.from(this.videos)})
+            .then(() => { 
+                // console.log('Stored videos')
+                chrome.storage.sync.get('watchedVids')
+                    // .then(videos => console.log('Videos stored: ', videos)) 
+            })
+    }
+
     store(videoId) {
         console.log('Storing video ' + videoId)
         this.videos.add(videoId)
+        this.storeInSync()
     }
 }
 
