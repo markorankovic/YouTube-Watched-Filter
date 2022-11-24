@@ -181,6 +181,10 @@ function initialize() {
 
 initialize()
 
+chrome.runtime.onMessage.addListener(function (req, sender, sendResponse) {
+    if (req.message == 'filterPage') evaluatePage()
+})
+
 // -------------------------------------------------------------------------
 
 // var sharedPort = chrome.runtime.connect()

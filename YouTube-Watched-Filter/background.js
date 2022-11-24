@@ -4,10 +4,7 @@ class VideoStore {
     videos = new Set()
 
     constructor() {
-        setTimeout(() => {
-            console.log('Timeout done')
-            this.load()
-        }, 10000)
+        this.load()
     }
 
     filter(videosLoaded) {
@@ -19,8 +16,11 @@ class VideoStore {
         chrome.storage.sync.get('watchedVids')
             .then(res => {
                 if (res?.watchedVids?.length) {
-                    this.videos = new Set(res.watchedVids)
-                    // Call for filter on current tab
+                    res.watchedVids.forEach(video => this.videos.add(video))
+                    getCurrentTab()
+                        .then(tab => {
+                            chrome.tabs.sendMessage(tab.id, {message: 'filterPage'}) 
+                        })
                 }
             })
     }
@@ -65,6 +65,12 @@ chrome.tabs.onUpdated.addListener(
         }
     }
 )
+
+async function getCurrentTab() {
+    let queryOptions = { active: true, lastFocusedWindow: true };
+    let [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+}
 
 // var sharedPort = {}
 
