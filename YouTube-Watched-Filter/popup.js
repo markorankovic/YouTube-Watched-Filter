@@ -1,3 +1,15 @@
+console.log('Popup executing')
+
+async function getCurrentTab() {
+    let queryOptions = { active: true, lastFocusedWindow: true };
+    let [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+}
+
+async function getFilteredVideos(tabId) {
+    
+}
+
 // document.addEventListener('DOMContentLoaded', async function() {
 //     const backgroundPage = chrome.extension.getBackgroundPage()
 
