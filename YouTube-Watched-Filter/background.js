@@ -21,9 +21,16 @@ class VideoStore {
         this.load()
     }
 
-    filter(videosLoaded) {
+    filter(videosLoaded, tabId) {
         // console.log('Videos received for filter: ', videosLoaded)
-        return videosLoaded.filter(video => ([...this.videos]).map(video => video.id).includes(video))
+        const videosAsArray = [...this.videos]
+        const videosToFilter = videosLoaded.filter(videoToFilter => {
+            const videoWithID = videosAsArray.filter(video => video.id == videoToFilter)[0]
+            if (videoWithID) videoWithID.addTab(tabId)
+            console.log('videoWithID: ', videoWithID)
+            return videoWithID ? true : false
+        })
+        return videosToFilter
     }
 
     async load() {
@@ -41,7 +48,7 @@ class VideoStore {
 
     async storeInSync() {
         // console.log('Videos to store: ', this.videos)
-        chrome.storage.sync.set({'watchedVids' : Array.from(this.videos)})
+        chrome.storage.sync.set({ 'watchedVids' : [...this.videos].map(video => video.id) })
             .then(() => { 
                 // console.log('Stored videos')
                 chrome.storage.sync.get('watchedVids')
@@ -70,7 +77,7 @@ chrome.runtime.onMessage.addListener(
             sendResponse('Video ' + request.videoId + ' has been received')
             videos.store(request.videoId)
         } else if (request.message == 'filterVideos') {
-            const videosToSend = videos.filter(request.videosLoaded)
+            const videosToSend = videos.filter(request.videosLoaded, sender.tab.id)
             // console.log('Videos to send:', videosToSend)
             sendResponse({videos: videosToSend})
         }
