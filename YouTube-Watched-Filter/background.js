@@ -1,5 +1,19 @@
 console.log('background.js executing')
 
+class Video {
+    id = null // The video ID
+    filtered = new Set() // The set of tabs the video is filtered under
+
+    constructor(id, tabId) {
+        this.id = id
+        if (tabId) addTab(tabId)
+    }
+
+    addTab(tabId) {
+        this.filtered.add(tabId)
+    }
+}
+
 class VideoStore {
     videos = new Set()
 
@@ -9,17 +23,17 @@ class VideoStore {
 
     filter(videosLoaded) {
         // console.log('Videos received for filter: ', videosLoaded)
-        return videosLoaded.filter(video => this.videos.has(video))
+        return videosLoaded.filter(video => ([...this.videos]).map(video => video.id).includes(video))
     }
 
     async load() {
         chrome.storage.sync.get('watchedVids')
             .then(res => {
                 if (res?.watchedVids?.length) {
-                    res.watchedVids.forEach(video => this.videos.add(video))
+                    res.watchedVids.forEach(videoId => this.add(videoId))
                     getCurrentTab()
                         .then(tab => {
-                            chrome.tabs.sendMessage(tab.id, {message: 'filterPage'}) 
+                            chrome.tabs.sendMessage(tab.id, {message: 'filterPage'})
                         })
                 }
             })
@@ -35,9 +49,15 @@ class VideoStore {
             })
     }
 
+    add(videoId) {
+        const exists = [...this.videos].filter(video => video.id == videoId).length > 0
+        if (exists) return
+        this.videos.add(new Video(videoId, null))
+    }
+
     store(videoId) {
         console.log('Storing video ' + videoId)
-        this.videos.add(videoId)
+        this.add(videoId)
         this.storeInSync()
     }
 }
