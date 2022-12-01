@@ -9,6 +9,10 @@ class Video {
         if (tabId) addTab(tabId)
     }
 
+    hasTab(tabId) {
+        return this.filtered.has(tabId)
+    }
+
     addTab(tabId) {
         this.filtered.add(tabId)
     }
@@ -21,13 +25,16 @@ class VideoStore {
         this.load()
     }
 
+    filteredByTab(tabId) {
+        return [...this.videos].filter(video => video.hasTab(tabId))
+    }
+
     filter(videosLoaded, tabId) {
         // console.log('Videos received for filter: ', videosLoaded)
         const videosAsArray = [...this.videos]
         const videosToFilter = videosLoaded.filter(videoToFilter => {
             const videoWithID = videosAsArray.filter(video => video.id == videoToFilter)[0]
             if (videoWithID) videoWithID.addTab(tabId)
-            console.log('videoWithID: ', videoWithID)
             return videoWithID ? true : false
         })
         return videosToFilter
@@ -80,6 +87,8 @@ chrome.runtime.onMessage.addListener(
             const videosToSend = videos.filter(request.videosLoaded, sender.tab.id)
             // console.log('Videos to send:', videosToSend)
             sendResponse({videos: videosToSend})
+        } else if (request.message.func == 'getFilteredVideosCount') {
+            sendResponse({videosFiltered: videos.filteredByTab(request.message.tab.id).length})
         }
     }
 )
@@ -94,9 +103,11 @@ chrome.tabs.onUpdated.addListener(
 )
 
 async function getCurrentTab() {
-    let queryOptions = { active: true, lastFocusedWindow: true };
-    let [tab] = await chrome.tabs.query(queryOptions);
-    return tab;
+    return new Promise(function(resolve, reject) {
+        chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+            resolve(tabs[0])
+        });    
+    })
 }
 
 // var sharedPort = {}

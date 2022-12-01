@@ -1,13 +1,19 @@
 console.log('Popup executing')
 
 async function getCurrentTab() {
-    let queryOptions = { active: true, lastFocusedWindow: true };
-    let [tab] = await chrome.tabs.query(queryOptions);
-    return tab;
+    return new Promise(function(resolve, reject) {
+        chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+            resolve(tabs[0])
+        });    
+    })
 }
 
-async function getFilteredVideos(tabId) {
-    
+async function getFilteredVideosCount() {
+    return new Promise(function(resolve, reject) {
+        getCurrentTab().then(tab => {
+            chrome.runtime.sendMessage({ message: {func: 'getFilteredVideosCount', tab: tab} }, (res) => { resolve(res.videosFiltered) })
+        })
+    })
 }
 
 // document.addEventListener('DOMContentLoaded', async function() {
