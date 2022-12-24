@@ -53,6 +53,10 @@ class VideoStore {
             })
     }
 
+    storeInFile() {
+        console.log("Storing data in file")
+    }
+
     async storeInSync() {
         // console.log('Videos to store: ', this.videos)
         chrome.storage.sync.set({ 'watchedVids' : [...this.videos].map(video => video.id) })
@@ -61,6 +65,7 @@ class VideoStore {
                 chrome.storage.sync.get('watchedVids')
                     // .then(videos => console.log('Videos stored: ', videos)) 
             })
+            .catch(err => { console.log("Error storing video: ", err); this.storeInFile() })
     }
 
     add(videoId) {
