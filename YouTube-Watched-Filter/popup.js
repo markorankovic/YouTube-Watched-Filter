@@ -1,5 +1,17 @@
 console.log('Popup executing')
 
+document.addEventListener('DOMContentLoaded', () => {
+    var enableCheckbox = document.getElementById("enableCheckbox")
+    enableCheckbox.addEventListener("click", enableClicked)    
+})
+
+function enableClicked() {
+    console.log('Enable button clicked')
+    var enableCheckbox = document.getElementById("enableCheckbox")
+    //chrome.storage.session.set({enabled: enableCheckbox.enabled}, () => { console.log('Success') })
+    chrome.storage.session.set({enabled: enableCheckbox.checked}, () => console.log('Success'))
+}
+
 async function getCurrentTab() {
     return new Promise(function(resolve, reject) {
         chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
