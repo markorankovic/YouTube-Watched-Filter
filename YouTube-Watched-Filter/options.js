@@ -19,6 +19,17 @@
 //     })   
 // }
 
+const fileReader = new FileReader()
+
+function handleFiles() {
+    const file = document.getElementById("localData").files[0]
+    console.log('File uploaded: ', file)
+    fileReader.readAsText(file)
+    fileReader.addEventListener("load", () => { console.log("Contents of uploaded file: ", fileReader.result) }, false)
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Options page loaded!')
+    const inputElement = document.getElementById("localData")
+    inputElement.addEventListener("change", handleFiles, false)
 })
