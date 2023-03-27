@@ -21,7 +21,7 @@
 
 const fileReader = new FileReader()
 
-function handleFiles() {
+function handleFile() {
     const file = document.getElementById("localData").files[0]
     console.log('File uploaded: ', file)
     fileReader.readAsText(file)
@@ -31,5 +31,5 @@ function handleFiles() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Options page loaded!')
     const inputElement = document.getElementById("localData")
-    inputElement.addEventListener("change", handleFiles, false)
+    inputElement.addEventListener("change", handleFile, false)
 })
