@@ -19,13 +19,23 @@
 //     })   
 // }
 
-const fileReader = new FileReader()
+async function setLoadedFile(url) {
+    chrome.storage.local.set({'archivedVideoLinks' : url}).then(_ => console.log('Saved file'))
+}
+
+function getFilePath(file) {
+    return URL.createObjectURL(file)
+}
 
 function handleFile() {
     const file = document.getElementById("localData").files[0]
-    console.log('File uploaded: ', file)
-    fileReader.readAsText(file)
-    fileReader.addEventListener("load", () => { console.log("Contents of uploaded file: ", fileReader.result) }, false)
+    const path = getFilePath(file)
+    setLoadedFile(path)
+    //getDataFromURL(path)
+    //console.log('File uploaded: ', file)
+    //fileReader.readAsText(file)
+    //fileReader.addEventListener("load", () => { console.log("Contents of uploaded file: ", fileReader.result) }, false)
+    //setLoadedFile(file)
 }
 
 document.addEventListener('DOMContentLoaded', () => {
