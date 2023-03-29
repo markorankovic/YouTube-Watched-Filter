@@ -53,13 +53,6 @@ class VideoStore {
             })
     }
 
-    async storeInFile() {
-        console.log("Storing data in file")
-        const json = JSON.stringify(this.videos)
-        const url = (await chrome.storage.local.get('archivedVideoLinks')).archivedVideoLinks
-        //saveAs(json, url)
-    }
-
     async storeInSync() {
         // console.log('Videos to store: ', this.videos)
         chrome.storage.sync.set({ 'watchedVids' : [...this.videos].map(video => video.id) })
@@ -68,7 +61,7 @@ class VideoStore {
                 chrome.storage.sync.get('watchedVids')
                     // .then(videos => console.log('Videos stored: ', videos)) 
             })
-            .catch(err => { console.log("Error storing video: ", err); this.storeInFile() })
+            .catch(err => { console.log("Error storing video: ", err) })
     }
 
     add(videoId) {
@@ -118,24 +111,11 @@ chrome.storage.onChanged.addListener((changes, _) => {
   }
 })
 
-async function loadArchivedVideos(archivedVideoLinks) {
-  console.log('Loading the archived videos')
-  const url = archivedVideoLinks
-  console.log('url: ', archivedVideoLinks)
-  const archivedVideos = await getDataFromURL(url)
+async function loadArchivedVideos(archivedVideos) {
   console.log('Archived videos: ', archivedVideos)
   for (video of archivedVideos) {
     videos.add(video)
   }
-}
-
-async function getDataFromURL(url) {
-  let blob = await fetch(url).then(r => r.blob()).catch(e => console.log('error: ', e));
-  const fileReader = new FileReader()
-  fileReader.readAsText(blob)
-  return new Promise((resolve, _) =>
-    fileReader.addEventListener("load", () => { resolve(fileReader.result) }, false)
-  )
 }
 
 async function getCurrentTab() {

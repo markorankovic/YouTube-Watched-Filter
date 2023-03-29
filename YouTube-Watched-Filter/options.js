@@ -19,27 +19,30 @@
 //     })   
 // }
 
-async function setLoadedFile(url) {
-    chrome.storage.local.set({'archivedVideoLinks' : url}).then(_ => console.log('Saved file'))
-}
-
 function getFilePath(file) {
     return URL.createObjectURL(file)
 }
 
-function handleFile() {
-    const file = document.getElementById("localData").files[0]
-    const path = getFilePath(file)
-    setLoadedFile(path)
-    //getDataFromURL(path)
-    //console.log('File uploaded: ', file)
-    //fileReader.readAsText(file)
-    //fileReader.addEventListener("load", () => { console.log("Contents of uploaded file: ", fileReader.result) }, false)
-    //setLoadedFile(file)
+async function importDatabase() {
+    const res = await window.showOpenFilePicker()
+    const handle = res[0]
+    const file = await handle.getFile()
+    const data = await getDataFromURL(getFilePath(file))
+    chrome.storage.local.set({'archivedVideoLinks' : data})
 }
+
+async function getDataFromURL(url) {
+    let blob = await fetch(url).then(r => r.blob()).catch(e => console.log('error: ', e));
+    const fileReader = new FileReader()
+    fileReader.readAsText(blob)
+    return new Promise((resolve, _) =>
+      fileReader.addEventListener("load", () => { resolve(fileReader.result) }, false)
+    )
+}  
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Options page loaded!')
-    const inputElement = document.getElementById("localData")
-    inputElement.addEventListener("change", handleFile, false)
+
+    const importButton = document.getElementById("import")
+    importButton.addEventListener("click", importDatabase, false)
 })
