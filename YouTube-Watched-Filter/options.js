@@ -23,6 +23,17 @@ function getFilePath(file) {
     return URL.createObjectURL(file)
 }
 
+async function exportDatabase() {
+    console.log('Exporting the database')
+    const videos = (await chrome.storage.sync.get('watchedVids')).watchedVids
+    console.log('Exporting videos: ', videos)
+    const res = await window.showSaveFilePicker()
+    console.log(res)
+    const writable = await res.createWritable()
+    await writable.write(videos.toString())
+    await writable.close()
+}
+
 async function importDatabase() {
     const res = await window.showOpenFilePicker()
     const handle = res[0]
@@ -45,4 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const importButton = document.getElementById("import")
     importButton.addEventListener("click", importDatabase, false)
+
+    const exportButton = document.getElementById("export")
+    exportButton.addEventListener("click", exportDatabase, false)
 })
