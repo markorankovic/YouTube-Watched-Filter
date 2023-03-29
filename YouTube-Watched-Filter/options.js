@@ -50,7 +50,11 @@ async function getDataFromURL(url) {
     return new Promise((resolve, _) =>
       fileReader.addEventListener("load", () => { resolve(fileReader.result) }, false)
     )
-}  
+}
+
+async function clearDatabase() {
+    chrome.storage.local.clear()
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Options page loaded!')
@@ -60,4 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const exportButton = document.getElementById("export")
     exportButton.addEventListener("click", exportDatabase, false)
+
+    const clearButton = document.getElementById("clear")
+    clearButton.addEventListener("click", clearDatabase, false)
 })
