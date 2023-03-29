@@ -55,7 +55,7 @@ class VideoStore {
 
     async storeInSync() {
         // console.log('Videos to store: ', this.videos)
-        chrome.storage.sync.set({ 'watchedVids' : [...this.videos].map(video => video.id) })
+        chrome.storage.sync.set({ 'watchedVids' : [...this.videos] })
             .then(() => { 
                 // console.log('Stored videos')
                 chrome.storage.sync.get('watchedVids')
