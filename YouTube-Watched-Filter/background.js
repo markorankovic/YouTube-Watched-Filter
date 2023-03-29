@@ -72,6 +72,12 @@ class VideoStore {
         this.process(archivedVideoLinks)
     }
 
+    async reset() {
+        console.log('Resetting videos')
+        this.videos.clear()
+        this.load()
+    }
+
     async storeLocally() {
         chrome.storage.local.set({ 'archivedVideoLinks' : [...this.videos] })
             .catch(err => { console.log("Error storing video: ", err) })
@@ -121,6 +127,9 @@ chrome.runtime.onMessage.addListener(
             sendResponse({videos: videosToSend})
         } else if (request.message.func == 'getFilteredVideosCount') {
             sendResponse({videosFiltered: videos.filteredByTab(request.message.tab.id).length})
+        } else if (request.message == 'resetLocal') {
+            chrome.storage.local.clear()
+            videos.reset()
         }
     }
 )

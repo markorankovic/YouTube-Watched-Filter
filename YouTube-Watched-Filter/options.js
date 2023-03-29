@@ -52,8 +52,8 @@ async function getDataFromURL(url) {
     )
 }
 
-async function clearDatabase() {
-    chrome.storage.local.clear()
+function clearDatabase() {
+    chrome.runtime.sendMessage({message: 'resetLocal'})
 }
 
 document.addEventListener('DOMContentLoaded', () => {
