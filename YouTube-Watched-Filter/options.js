@@ -27,7 +27,7 @@ async function exportDatabase() {
     console.log('Exporting the database')
     const videos = (await chrome.storage.sync.get('watchedVids')).watchedVids
     console.log('Exporting videos: ', videos)
-    const res = await window.showSaveFilePicker()
+    const res = await window.showSaveFilePicker({types: [{description: 'JSON file', accept: {'application/json': ['.json']}}]})
     console.log(res)
     const writable = await res.createWritable()
     await writable.write(videos.toString())
