@@ -29,28 +29,52 @@ class VideoStore {
         return [...this.videos].filter(video => video.hasTab(tabId))
     }
 
+    videoToFilterMatchesVideoId(video) {
+        return video.id == videoToFilter
+    }
+
+    exists(video) {
+        return [...this.videos].map(v => v.id).includes(video)
+    }
+
+    getById(id) {
+        return [...this.videos].find(video => video.id == id)
+    }
+
     filter(videosLoaded, tabId) {
-        // console.log('Videos received for filter: ', videosLoaded)
-        const videosAsArray = [...this.videos]
-        const videosToFilter = videosLoaded.filter(videoToFilter => {
-            const videoWithID = videosAsArray.filter(video => video.id == videoToFilter)[0]
-            if (videoWithID) videoWithID.addTab(tabId)
-            return videoWithID ? true : false
-        })
-        return videosToFilter
+        var videosToRemove = []
+        for (const loadedVideo of videosLoaded) {
+            if (this.exists(loadedVideo)) {
+                videosToRemove.push(loadedVideo)
+                this.getById(loadedVideo).tab = tabId
+            }
+        }
+        return videosToRemove
+    }
+
+    process(videos) {
+        console.log('videos: ', videos)
+        if (videos?.length) {
+            console.log('videos length: ', videos.length)
+            for (const video of videos) { console.log('video: ', video); this.add(video) }
+            console.log(this.videos)
+            getCurrentTab()
+                .then(tab => {
+                    chrome.tabs.sendMessage(tab.id, {message: 'filterPage'})
+                })
+        }
     }
 
     async load() {
-        chrome.storage.sync.get('watchedVids')
-            .then(res => {
-                if (res?.watchedVids?.length) {
-                    res.watchedVids.forEach(videoId => this.add(videoId))
-                    getCurrentTab()
-                        .then(tab => {
-                            chrome.tabs.sendMessage(tab.id, {message: 'filterPage'})
-                        })
-                }
-            })
+        const watchedVids = (await chrome.storage.sync.get('watchedVids')).watchedVids
+        const archivedVideoLinks = (await chrome.storage.local.get('archivedVideoLinks')).archivedVideoLinks
+        this.process(watchedVids)
+        this.process(archivedVideoLinks)
+    }
+
+    async storeLocally() {
+        chrome.storage.local.set({ 'archivedVideoLinks' : [...this.videos] })
+            .catch(err => { console.log("Error storing video: ", err) })
     }
 
     async storeInSync() {
@@ -64,16 +88,23 @@ class VideoStore {
             .catch(err => { console.log("Error storing video: ", err) })
     }
 
-    add(videoId) {
+    addNew(videoId) {
         const exists = [...this.videos].filter(video => video.id == videoId).length > 0
         if (exists) return
         this.videos.add(new Video(videoId, null))
     }
 
+    add(video) {
+        const exists = this.exists(video.id)
+        if (exists) { return }
+        console.log('Adding video: ', video)
+        this.videos.add(new Video(video.id, null))
+    }
+
     store(videoId) {
-        console.log('Storing video ' + videoId)
-        this.add(videoId)
-        this.storeInSync()
+        // console.log('Storing video ' + videoId)
+        this.addNew(videoId)
+        this.storeInSync().catch(_ => this.storeLocally())
     }
 }
 
@@ -112,10 +143,11 @@ chrome.storage.onChanged.addListener((changes, _) => {
 })
 
 async function loadArchivedVideos(archivedVideos) {
-  console.log('Archived videos: ', archivedVideos)
-  for (video of archivedVideos) {
-    videos.add(video)
-  }
+    console.log('Archived videos: ', archivedVideos)
+    await chrome.storage.local.set({'archivedVideoLinks' : archivedVideos})
+    for (const video of archivedVideos) {
+        videos.add(video)
+    }
 }
 
 async function getCurrentTab() {

@@ -30,7 +30,7 @@ async function exportDatabase() {
     const res = await window.showSaveFilePicker({types: [{description: 'JSON file', accept: {'application/json': ['.json']}}]})
     console.log(res)
     const writable = await res.createWritable()
-    await writable.write(videos.toString())
+    await writable.write(JSON.stringify(videos))
     await writable.close()
 }
 
@@ -39,7 +39,8 @@ async function importDatabase() {
     const handle = res[0]
     const file = await handle.getFile()
     const data = await getDataFromURL(getFilePath(file))
-    chrome.storage.local.set({'archivedVideoLinks' : data})
+    console.log('JSON.parse(data): ', JSON.parse(data))
+    chrome.storage.local.set({'archivedVideoLinks' : JSON.parse(data)})
 }
 
 async function getDataFromURL(url) {
