@@ -74,8 +74,8 @@ class VideoStore {
 
     async reset() {
         console.log('Resetting videos')
-        this.videos.clear()
-        this.load()
+        await this.videos.clear()
+        await this.load()
     }
 
     async storeLocally() {
@@ -116,6 +116,11 @@ class VideoStore {
 
 const videos = new VideoStore()
 
+async function resetLocal() {
+    await chrome.storage.local.clear()
+    await videos.reset()
+}
+
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.videoId) {
@@ -128,8 +133,7 @@ chrome.runtime.onMessage.addListener(
         } else if (request.message.func == 'getFilteredVideosCount') {
             sendResponse({videosFiltered: videos.filteredByTab(request.message.tab.id).length})
         } else if (request.message == 'resetLocal') {
-            chrome.storage.local.clear()
-            videos.reset()
+            resetLocal()
         }
     }
 )
