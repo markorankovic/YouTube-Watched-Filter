@@ -52,8 +52,12 @@ async function getDataFromURL(url) {
     )
 }
 
-function clearDatabase() {
+function clearLocalDatabase() {
     chrome.runtime.sendMessage({message: 'resetLocal'})
+}
+
+function clearSyncDatabase() {
+    chrome.runtime.sendMessage({message: 'resetSync'})
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -66,5 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
     exportButton.addEventListener("click", exportDatabase, false)
 
     const clearButton = document.getElementById("clear")
-    clearButton.addEventListener("click", clearDatabase, false)
+    clearButton.addEventListener("click", clearLocalDatabase, false)
+
+    const clearSyncButton = document.getElementById("clearSync")
+    clearSyncButton.addEventListener("click", clearSyncDatabase, false)
 })

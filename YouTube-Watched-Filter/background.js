@@ -121,6 +121,11 @@ async function resetLocal() {
     await videos.reset()
 }
 
+async function resetSync() {
+    await chrome.storage.sync.clear()
+    await videos.reset()
+}
+
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.videoId) {
@@ -134,6 +139,8 @@ chrome.runtime.onMessage.addListener(
             sendResponse({videosFiltered: videos.filteredByTab(request.message.tab.id).length})
         } else if (request.message == 'resetLocal') {
             resetLocal()
+        } else if (request.message == 'resetSync') {
+            resetSync()
         }
     }
 )
