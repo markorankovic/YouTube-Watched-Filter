@@ -46,7 +46,7 @@ class VideoStore {
         for (const loadedVideo of videosLoaded) {
             if (this.exists(loadedVideo)) {
                 videosToRemove.push(loadedVideo)
-                this.getById(loadedVideo).tab = tabId
+                this.getById(loadedVideo).filtered.add(tabId)
             }
         }
         return videosToRemove

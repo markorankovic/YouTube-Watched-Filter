@@ -2,7 +2,11 @@ console.log('Popup executing')
 
 document.addEventListener('DOMContentLoaded', () => {
     var enableCheckbox = document.getElementById("enableCheckbox")
-    enableCheckbox.addEventListener("click", enableClicked)    
+    enableCheckbox.addEventListener("click", enableClicked)
+    getFilteredVideosCount().then(n => {
+        var filterCount = document.getElementById('filteredOnPage')
+        filterCount.textContent = 'Filtered on page: ' + n
+    })
 })
 
 function enableClicked() {
