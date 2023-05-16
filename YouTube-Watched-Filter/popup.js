@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
         var filterCount = document.getElementById('filteredOnPage')
         filterCount.textContent = 'Filtered on page: ' + n
     })
+    getTotalVideosCount().then(n => {
+        var videosAdded = document.getElementById('totalFiltered')
+        videosAdded.textContent = 'Videos added: ' + n
+    })
 })
 
 function enableClicked() {
@@ -29,6 +33,12 @@ async function getFilteredVideosCount() {
         getCurrentTab().then(tab => {
             chrome.runtime.sendMessage({ message: {func: 'getFilteredVideosCount', tab: tab} }, (res) => { resolve(res.videosFiltered) })
         })
+    })
+}
+
+async function getTotalVideosCount() {
+    return new Promise(function(resolve, reject) {
+        chrome.runtime.sendMessage({ message: {func: 'getTotalVideosCount'} }, (res) => { resolve(res.totalVideos) })
     })
 }
 

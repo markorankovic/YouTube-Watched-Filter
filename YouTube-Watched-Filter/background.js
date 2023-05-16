@@ -137,6 +137,8 @@ chrome.runtime.onMessage.addListener(
             sendResponse({videos: videosToSend})
         } else if (request.message.func == 'getFilteredVideosCount') {
             sendResponse({videosFiltered: videos.filteredByTab(request.message.tab.id).length})
+        } else if (request.message.func == 'getTotalVideosCount') {
+            sendResponse({totalVideos: videos.videos.size})
         } else if (request.message == 'resetLocal') {
             resetLocal()
         } else if (request.message == 'resetSync') {
