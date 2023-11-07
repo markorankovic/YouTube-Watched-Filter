@@ -95,16 +95,14 @@ class VideoStore {
     }
 
     addNew(videoId) {
-        const exists = [...this.videos].filter(video => video.id == videoId).length > 0
+        const exists = this.exists(videoId)
         if (exists) return
+        console.log('Adding video: ', videoId)
         this.videos.add(new Video(videoId, null))
     }
 
     add(video) {
-        const exists = this.exists(video.id)
-        if (exists) { return }
-        console.log('Adding video: ', video)
-        this.videos.add(new Video(video.id, null))
+        this.addNew(video.id)
     }
 
     store(videoId) {
