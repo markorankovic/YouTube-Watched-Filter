@@ -108,7 +108,8 @@ function trimToId(link) {
     const youtubeShortsFormat = 'https://www.youtube.com/shorts/'
     const isYouTubeShorts = link.includes(youtubeShortsFormat)
     const format = isYouTubeShorts ? youtubeShortsFormat : youtubeVideoFormat
-    return link.replace(format, isYouTubeShorts ? 's:' : '')
+    const videoId = link.replace(format, isYouTubeShorts ? 's:' : '').split('&')[0]
+    return videoId
 }
 
 function videoElementToVideoId(videoElement) {
