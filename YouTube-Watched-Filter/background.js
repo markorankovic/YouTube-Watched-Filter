@@ -1,5 +1,7 @@
 console.log('background.js executing')
 
+chrome.storage.session.setAccessLevel({ accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS' });
+
 class Video {
     id = null // The video ID
     filtered = new Set() // The set of tabs the video is filtered under

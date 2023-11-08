@@ -1,8 +1,5 @@
 console.log('foreground.js executing')
 
-const reversed = false
-const enabled = true
-
 function passWatchedVideo(videoId) {
     console.log('Passing watched video:', videoId)
     chrome.runtime.sendMessage({videoId : videoId}, (res) => console.log(res))
@@ -156,15 +153,19 @@ function trackChangesToSearchResults() {
     observer.observe(targetNode, config)    
 }
 
-function evaluatePage() {
-    if (onYouTubeVideo() || onYouTubeShorts()) {
-        console.log('Now watching video')
-        addVideoToFilter(trimToId(getCurrentURL()))
-    } else if (onYouTubeSearchResultsPage) {
-        console.log('Now searching for videos')
-        filterWatchedVideos(getVideoResultsOnPage());
-        trackChangesToSearchResults()
-    }
+async function evaluatePage() {
+    chrome.storage.session.get('enabled').then(result => {
+        console.log(result)
+        if (!result.enabled) { return }
+        if (onYouTubeVideo() || onYouTubeShorts()) {
+            console.log('Now watching video')
+            addVideoToFilter(trimToId(getCurrentURL()))
+        } else if (onYouTubeSearchResultsPage) {
+            console.log('Now searching for videos')
+            filterWatchedVideos(getVideoResultsOnPage());
+            trackChangesToSearchResults()
+        }    
+    }).catch(err => console.log('Error getting enabled: ', err))
 }
 
 function listenForURLChanges() {

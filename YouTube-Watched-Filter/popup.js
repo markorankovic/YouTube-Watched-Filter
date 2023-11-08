@@ -1,8 +1,7 @@
 console.log('Popup executing')
 
 document.addEventListener('DOMContentLoaded', () => {
-    var enableCheckbox = document.getElementById("enableCheckbox")
-    enableCheckbox.addEventListener("click", enableClicked)
+    initializeEnabled()
     getFilteredVideosCount().then(n => {
         var filterCount = document.getElementById('filteredOnPage')
         filterCount.textContent = 'Filtered on page: ' + n
@@ -12,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
         videosAdded.textContent = 'Videos added: ' + n
     })
 })
+
+function initializeEnabled() {
+    var enableCheckbox = document.getElementById("enableCheckbox")
+    console.log(enableCheckbox.addEventListener)
+    enableCheckbox.addEventListener('change', enableClicked)
+    chrome.storage.session.get('enabled').then(result => { enableCheckbox.checked = result.enabled })
+}
 
 function enableClicked() {
     console.log('Enable button clicked')
