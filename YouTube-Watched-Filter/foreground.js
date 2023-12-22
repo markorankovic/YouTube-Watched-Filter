@@ -5,7 +5,8 @@ function passWatchedVideo(videoId) {
     chrome.runtime.sendMessage({videoId : videoId}, (res) => console.log(res))
 }
 
-function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
+async function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
+    // console.log('Videos to filter: ', videosToFilter)
     var videosToRemove = []
     for (const videoToFilter of videosToFilter) {
         for (const videoLoaded of videosLoaded) {
@@ -20,7 +21,8 @@ function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
         return res
     }    
     const reversedVideosToRemove = videosSub(videosLoaded, videosToRemove)
-    return reversed ? reversedVideosToRemove : videosToRemove
+    const result = await chrome.storage.session.get('reversed')
+    return result.reversed ? reversedVideosToRemove : videosToRemove
 }
 
 async function getExistingVideos(videosLoaded) {
@@ -35,13 +37,16 @@ async function getExistingVideos(videosLoaded) {
 }
 
 async function removeVideosExistingInFilter(videosLoaded) {
+    // console.log('Videos loaded: ', videosLoaded)
     const videosToFilter = await getExistingVideos(videosLoaded)
-    const matchingVideos = getVideosWithMatchingIds(videosLoaded, videosToFilter)
+    const matchingVideos = await getVideosWithMatchingIds(videosLoaded, videosToFilter)
     // console.log('Videos to remove: ', matchingVideos)
     removeVideos(matchingVideos)
 }
 
 function removeVideos(videos) {
+    if (videos.length === 0) return
+    console.log('Removing videos: ', videos)
     for (const videoElement of videos) {
         videoElement.remove()
         console.log('Video ' + videoElementToVideoId(videoElement) + ' has been removed')
@@ -57,9 +62,7 @@ function removeUnfinishedVideos(videos) {
 }
 
 function filterWatchedVideos(videos) {
-    if (!enabled) return
     // const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
-    // console.log('Filtering watched videos: ', videoIds)
     removeVideosExistingInFilter(videos)
     removeUnfinishedVideos(videos)
 }
@@ -85,7 +88,6 @@ function getCurrentURL() {
 }
 
 function addVideoToFilter(videoId) {
-    if (!enabled) return
     //console.log('Adding video to filter: ', videoId);
     passWatchedVideo(videoId)
 }
@@ -161,7 +163,8 @@ async function evaluatePage() {
             console.log('Now watching video')
             addVideoToFilter(trimToId(getCurrentURL()))
         } else if (onYouTubeSearchResultsPage) {
-            console.log('Now searching for videos')
+            // console.log('Now searching for videos')
+            // console.log('Videos on page: ', getVideoResultsOnPage())
             filterWatchedVideos(getVideoResultsOnPage());
             trackChangesToSearchResults()
         }    
