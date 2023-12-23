@@ -152,8 +152,8 @@ chrome.runtime.onMessage.addListener(
 )
 
 chrome.tabs.onUpdated.addListener(
-    function(tabId, changeInfo, tab) {
-        videos.filteredByTab(tabId).forEach(video => video.removeTab(tabId))
+    async function(tabId, changeInfo, tab) {
+        await videos.filteredByTab(tabId).forEach(video => video.removeTab(tabId))
         if (changeInfo.url) {
             console.log('URL changed at tab: ', tabId)
             chrome.tabs.sendMessage(tabId, { message : 'urlChanged' }).catch(err => console.log('Error messaging tab: ', err))
