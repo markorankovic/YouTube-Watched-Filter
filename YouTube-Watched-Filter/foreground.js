@@ -162,7 +162,7 @@ async function evaluatePage() {
         if (onYouTubeVideo() || onYouTubeShorts()) {
             console.log('Now watching video')
             addVideoToFilter(trimToId(getCurrentURL()))
-        } else if (onYouTubeSearchResultsPage) {
+        } else if (onYouTubeSearchResultsPage()) {
             // console.log('Now searching for videos')
             // console.log('Videos on page: ', getVideoResultsOnPage())
             filterWatchedVideos(getVideoResultsOnPage());
