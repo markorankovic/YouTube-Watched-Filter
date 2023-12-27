@@ -156,7 +156,7 @@ function trackChangesToSearchResults() {
 }
 
 async function evaluatePage() {
-    chrome.storage.session.get('enabled').then(result => {
+    chrome.storage.sync.get('enabled').then(result => {
         console.log(result)
         if (!result.enabled) { return }
         if (onYouTubeVideo() || onYouTubeShorts()) {

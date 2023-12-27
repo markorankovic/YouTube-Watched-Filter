@@ -161,6 +161,10 @@ chrome.tabs.onUpdated.addListener(
     }
 )
 
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.storage.sync.set({'enabled': true})
+})
+
 chrome.storage.onChanged.addListener((changes, _) => {
   console.log('Changes detected on storage: ', changes)
   if (changes.archivedVideoLinks) {

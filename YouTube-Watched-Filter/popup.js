@@ -16,14 +16,14 @@ function initializeEnabled() {
     var enableCheckbox = document.getElementById("enableCheckbox")
     console.log(enableCheckbox.addEventListener)
     enableCheckbox.addEventListener('change', enableClicked)
-    chrome.storage.session.get('enabled').then(result => { enableCheckbox.checked = result.enabled })
+    chrome.storage.sync.get('enabled').then(result => { enableCheckbox.checked = result.enabled })
 }
 
 function enableClicked() {
     console.log('Enable button clicked')
     var enableCheckbox = document.getElementById("enableCheckbox")
     //chrome.storage.session.set({enabled: enableCheckbox.enabled}, () => { console.log('Success') })
-    chrome.storage.session.set({enabled: enableCheckbox.checked}, () => console.log('Success'))
+    chrome.storage.sync.set({enabled: enableCheckbox.checked}, () => console.log('Success'))
 }
 
 async function getCurrentTab() {
