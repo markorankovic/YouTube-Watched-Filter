@@ -5,24 +5,24 @@ function passWatchedVideo(videoId) {
     chrome.runtime.sendMessage({videoId : videoId}, (res) => console.log(res))
 }
 
+function videoElementWithID(videoId, videosLoaded) {
+    for (const videoLoaded of videosLoaded) {
+        if (videoElementToVideoId(videoLoaded) == videoId) {
+            return videoLoaded
+        }
+    }
+    return null
+}
+
 async function getVideosWithMatchingIds(videosLoaded, videosToFilter) {
     // console.log('Videos to filter: ', videosToFilter)
     var videosToRemove = []
     for (const videoToFilter of videosToFilter) {
-        for (const videoLoaded of videosLoaded) {
-            if (videoElementToVideoId(videoLoaded) == videoToFilter) videosToRemove.push(videoLoaded)
-        }
+        const videoElement = videoElementWithID(videoToFilter, videosLoaded)
+        const videoExists = !!videoElement
+        if (videoExists) videosToRemove.push(videoElement)
     }
-    function videosSub(lhs, rhs) {
-        var res = []
-        for (e of lhs) {
-            if (!rhs.includes(e)) res.push(e)
-        }
-        return res
-    }    
-    const reversedVideosToRemove = videosSub(videosLoaded, videosToRemove)
-    const result = await chrome.storage.session.get('reversed')
-    return result.reversed ? reversedVideosToRemove : videosToRemove
+    return videosToRemove
 }
 
 async function getExistingVideos(videosLoaded) {
@@ -36,35 +36,61 @@ async function getExistingVideos(videosLoaded) {
     })
 }
 
+async function videoExists(videoId) {
+    return new Promise(function(resolve, _) {
+        chrome.runtime.sendMessage(
+            {message : 'exists', videoId : videoId},
+            (res) => {
+                resolve(res.exists)
+            }
+        )
+    })
+}
+
 async function removeVideosExistingInFilter(videosLoaded) {
-    // console.log('Videos loaded: ', videosLoaded)
     const videosToFilter = await getExistingVideos(videosLoaded)
     const matchingVideos = await getVideosWithMatchingIds(videosLoaded, videosToFilter)
-    // console.log('Videos to remove: ', matchingVideos)
     removeVideos(matchingVideos)
+}
+
+async function removeVideosOutsideFilter(videosLoaded) {
+    const videosToRemove = []
+    for (const videoLoaded of videosLoaded) {
+        const exists = await videoExists(videoElementToVideoId(videoLoaded))
+        if (!exists) videosToRemove.push(videoLoaded)
+    }
+    filterUnfinishedVideos(videosLoaded, true)
+    removeVideos(videosToRemove)
 }
 
 function removeVideos(videos) {
     if (videos.length === 0) return
-    console.log('Removing videos: ', videos)
     for (const videoElement of videos) {
         videoElement.remove()
         console.log('Video ' + videoElementToVideoId(videoElement) + ' has been removed')
     }
 }
 
-function removeUnfinishedVideos(videos) {
-    // console.log('Videos: ', videos)
+function filterUnfinishedVideos(videos, reversed) {
     function videoElementHasProgressBar(video) {
         return video.getElementsByTagName('ytd-thumbnail-overlay-resume-playback-renderer').length > 0
     }
-    removeVideos(videos.filter(video => videoElementHasProgressBar(video)))
+    if (reversed) {
+        removeVideos(videos.filter(video => !videoElementHasProgressBar(video)))
+    } else {
+        removeVideos(videos.filter(video => videoElementHasProgressBar(video)))
+    }
 }
 
-function filterWatchedVideos(videos) {
+async function filterVideos(videos) {
     // const videoIds = videos.map(videoElement => videoElementToVideoId(videoElement))
-    removeVideosExistingInFilter(videos)
-    removeUnfinishedVideos(videos)
+    const isReversed = (await chrome.storage.sync.get('reversed')).reversed
+    if (isReversed) {
+        removeVideosOutsideFilter(videos)
+    } else {
+        removeVideosExistingInFilter(videos)
+        filterUnfinishedVideos(videos, false)
+    }
 }
 
 function onPage(URL) {
@@ -132,14 +158,13 @@ function trackChangesToSearchResults() {
             for (const mutation of mutationList) {
                 if (mutation.type === 'childList') {
                     const newVideos = getVideoResultsOnPage()
-                    removeUnfinishedVideos(newVideos)
                     if (!videosAreTheSame(newVideos, videos)) { // After a mutation to the contents, if the number of videos found is different to previous mutation
                         function newlyLoadedVideos(newVideos, videos) { // Only new videos that haven't gone through the filter will be processed
                             return newVideos.filter(newVideo => !videos.includes(newVideo))
                         }
                         const newlyLoadedVideoElements = newlyLoadedVideos(newVideos, videos)
                         if (newlyLoadedVideoElements.length > 0) {
-                            filterWatchedVideos(newlyLoadedVideoElements) // Call the filter function
+                            filterVideos(newlyLoadedVideoElements) // Call the filter function
                             videos = Array.from(newVideos)
                         }
                     }
@@ -165,7 +190,7 @@ async function evaluatePage() {
         } else if (onYouTubeSearchResultsPage()) {
             // console.log('Now searching for videos')
             // console.log('Videos on page: ', getVideoResultsOnPage())
-            filterWatchedVideos(getVideoResultsOnPage());
+            filterVideos(getVideoResultsOnPage());
             trackChangesToSearchResults()
         }    
     }).catch(err => console.log('Error getting enabled: ', err))

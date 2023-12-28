@@ -132,17 +132,20 @@ async function resetSync() {
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-        if (request.videoId) {
+        console.log('request: ', request)
+        if (request.videoId && !request.message) {
             sendResponse('Video ' + request.videoId + ' has been received')
             videos.store(request.videoId)
         } else if (request.message == 'filterVideos') {
             const videosToSend = videos.filter(request.videosLoaded, sender.tab.id)
-            // console.log('Videos to send:', videosToSend)
             sendResponse({videos: videosToSend})
         } else if (request.message.func == 'getFilteredVideosCount') {
             sendResponse({videosFiltered: videos.filteredByTab(request.message.tab.id).length})
         } else if (request.message.func == 'getTotalVideosCount') {
             sendResponse({totalVideos: videos.videos.size})
+        } else if (request.message === 'exists') {
+            const exists = videos.exists(request.videoId)
+            sendResponse({exists: exists})
         } else if (request.message == 'resetLocal') {
             resetLocal()
         } else if (request.message == 'resetSync') {

@@ -1,7 +1,7 @@
 console.log('Popup executing')
 
 document.addEventListener('DOMContentLoaded', () => {
-    initializeEnabled()
+    initializePopup()
     getFilteredVideosCount().then(n => {
         var filterCount = document.getElementById('filteredOnPage')
         filterCount.textContent = 'Filtered on page: ' + n
@@ -12,18 +12,28 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 })
 
-function initializeEnabled() {
+function initializeCheckbox(checkbox, storageKey, callback) {
+    checkbox.addEventListener('change', callback)
+    chrome.storage.sync.get(storageKey).then(result => { checkbox.checked = result[storageKey] })
+}
+
+function initializePopup() {
     var enableCheckbox = document.getElementById("enableCheckbox")
-    console.log(enableCheckbox.addEventListener)
-    enableCheckbox.addEventListener('change', enableClicked)
-    chrome.storage.sync.get('enabled').then(result => { enableCheckbox.checked = result.enabled })
+    var reversedCheckbox = document.getElementById("reversedCheckbox")
+    initializeCheckbox(enableCheckbox, 'enabled', enableClicked)
+    initializeCheckbox(reversedCheckbox, 'reversed', reversedClicked)
 }
 
 function enableClicked() {
     console.log('Enable button clicked')
     var enableCheckbox = document.getElementById("enableCheckbox")
-    //chrome.storage.session.set({enabled: enableCheckbox.enabled}, () => { console.log('Success') })
     chrome.storage.sync.set({enabled: enableCheckbox.checked}, () => console.log('Success'))
+}
+
+function reversedClicked() {
+    console.log('Reversed button clicked')
+    var reversedCheckbox = document.getElementById("reversedCheckbox")
+    chrome.storage.sync.set({reversed: reversedCheckbox.checked}, () => console.log('Success'))
 }
 
 async function getCurrentTab() {
