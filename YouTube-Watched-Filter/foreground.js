@@ -56,9 +56,9 @@ async function removeVideosExistingInFilter(videosLoaded) {
 async function removeVideosOutsideFilter(videosLoaded) {
     const videosToRemove = []
     for (const videoLoaded of videosLoaded) {
-        const exists = await videoExists(videoElementToVideoId(videoLoaded))
+        const watched = await videoExists(videoElementToVideoId(videoLoaded))
         const unfinishedVideo = videoElementHasProgressBar(videoLoaded)
-        if (!exists && !unfinishedVideo) videosToRemove.push(videoLoaded)
+        if (!watched && !unfinishedVideo) videosToRemove.push(videoLoaded)
     }
     removeVideos(videosToRemove)
 }
