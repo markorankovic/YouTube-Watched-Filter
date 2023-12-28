@@ -60,6 +60,7 @@ async function removeVideosOutsideFilter(videosLoaded) {
         const unfinishedVideo = videoElementHasProgressBar(videoLoaded)
         if (!watched && !unfinishedVideo) videosToRemove.push(videoLoaded)
     }
+    getExistingVideos(videosLoaded.filter(video => !videosToRemove.includes(video)))
     removeVideos(videosToRemove)
 }
 
