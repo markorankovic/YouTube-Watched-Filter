@@ -57,9 +57,9 @@ async function removeVideosOutsideFilter(videosLoaded) {
     const videosToRemove = []
     for (const videoLoaded of videosLoaded) {
         const exists = await videoExists(videoElementToVideoId(videoLoaded))
-        if (!exists) videosToRemove.push(videoLoaded)
+        const unfinishedVideo = videoElementHasProgressBar(videoLoaded)
+        if (!exists && !unfinishedVideo) videosToRemove.push(videoLoaded)
     }
-    filterUnfinishedVideos(videosLoaded, true)
     removeVideos(videosToRemove)
 }
 
@@ -71,15 +71,12 @@ function removeVideos(videos) {
     }
 }
 
-function filterUnfinishedVideos(videos, reversed) {
-    function videoElementHasProgressBar(video) {
-        return video.getElementsByTagName('ytd-thumbnail-overlay-resume-playback-renderer').length > 0
-    }
-    if (reversed) {
-        removeVideos(videos.filter(video => !videoElementHasProgressBar(video)))
-    } else {
-        removeVideos(videos.filter(video => videoElementHasProgressBar(video)))
-    }
+function videoElementHasProgressBar(video) {
+    return video.getElementsByTagName('ytd-thumbnail-overlay-resume-playback-renderer').length > 0
+}
+
+function filterUnfinishedVideos(videos) {
+    removeVideos(videos.filter(video => videoElementHasProgressBar(video)))
 }
 
 async function filterVideos(videos) {
@@ -89,7 +86,7 @@ async function filterVideos(videos) {
         removeVideosOutsideFilter(videos)
     } else {
         removeVideosExistingInFilter(videos)
-        filterUnfinishedVideos(videos, false)
+        filterUnfinishedVideos(videos)
     }
 }
 
